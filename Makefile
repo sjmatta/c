@@ -5,8 +5,8 @@ PYTHON := python
 UV := uv
 
 # Default values
-REQUIREMENTS := Create a modern button component with loading states and hover effects
-ITERATIONS := 1
+REQUIREMENTS := Create a beautiful user profile card with avatar, name, title, bio, and action buttons. Include hover animations and professional icons.
+ITERATIONS := 2
 OUTPUT := component_result.json
 
 .PHONY: help setup test test-apis demo clean install deps
@@ -19,20 +19,20 @@ help:
 	@echo "Available commands:"
 	@echo ""
 	@echo "  make setup          - Complete setup (install deps + get cookies)"
-	@echo "  make simple         - Quick end-to-end test + preview (1 iteration, ~90s)"
-	@echo "  make demo           - Full end-to-end demo + preview (1 iteration, ~90sec)"
+	@echo "  make simple         - Quick end-to-end test + preview (2 iterations, ~120s)"
+	@echo "  make demo           - Full end-to-end demo + preview (2 iterations, ~120sec)"
 	@echo "  make pure-demo      - Demo with PURE framework analysis"
 	@echo "  make test           - Run all tests"
 	@echo "  make test-apis      - Test OpenUI and Gemini API connections"
 	@echo "  make preview        - Generate HTML preview from existing results"
 	@echo "  make clean          - Clean generated files"
 	@echo ""
-	@echo "Component creation:"
+	@echo "Component creation (with Heroicons + Framer Motion):"
 	@echo "  make create         - Create component with default requirements"
-	@echo "  make button         - Create a button component"
-	@echo "  make card           - Create a user profile card"
-	@echo "  make toggle         - Create a toggle switch"
-	@echo "  make table          - Create a data table component"
+	@echo "  make button         - Create animated button component"
+	@echo "  make card           - Create animated user profile card"
+	@echo "  make toggle         - Create animated toggle switch"
+	@echo "  make table          - Create animated data table component"
 	@echo ""
 	@echo "Custom creation:"
 	@echo "  make create REQUIREMENTS='Your requirements here' ITERATIONS=3"
@@ -46,6 +46,7 @@ help:
 	@echo "  - OpenUI running at localhost:7878"
 	@echo "  - Valid Gemini API key"
 	@echo "  - Python 3.8+ and uv installed"
+	@echo "  - Node.js for @heroicons/react and framer-motion"
 
 # Complete setup
 setup: install get-cookies
@@ -53,13 +54,16 @@ setup: install get-cookies
 
 # Install dependencies
 install:
-	@echo "📦 Installing dependencies with uv..."
+	@echo "📦 Installing Python dependencies with uv..."
 	$(UV) sync
+	@echo "📦 Installing Node.js dependencies..."
+	npm install
 
 # Alternative dependency installation
 deps:
 	@echo "📦 Installing/updating dependencies..."
 	$(UV) add crewai google-generativeai requests selenium sseclient-py
+	npm install @heroicons/react framer-motion
 
 # Get authentication cookies from OpenUI
 get-cookies:
@@ -139,34 +143,34 @@ create:
 	@echo "🌐 Opening component preview in browser..."
 	@which open >/dev/null && open create_preview.html || echo "   Run: open create_preview.html"
 
-# Predefined component types
+# Predefined component types with animations and professional icons
 button:
-	@echo "🔘 Creating button component..."
-	$(PYTHON) main.py -r 'Create a modern button component with multiple variants (primary, secondary, danger), loading states, icons, and smooth hover animations. Make it accessible and responsive.' -i 1 -o button_result.json
+	@echo "🔘 Creating animated button component..."
+	$(PYTHON) main.py -r 'Create a stunning button component with multiple variants (primary, secondary, danger), loading states, Heroicons, and smooth Framer Motion animations. Include scale and color transitions on hover/tap.' -i 2 -o button_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py button_result.json button_preview.html
 	@echo "🌐 Opening button preview in browser..."
 	@which open >/dev/null && open button_preview.html || echo "   Run: open button_preview.html"
 
 card:
-	@echo "🃏 Creating user profile card..."
-	$(PYTHON) main.py -r 'Create a modern user profile card component with avatar, name, title, bio, social links, follow button, and elegant hover effects. Include responsive design and accessibility features.' -i 1 -o card_result.json
+	@echo "🃏 Creating animated user profile card..."
+	$(PYTHON) main.py -r 'Create a beautiful user profile card with avatar, name, title, bio, Heroicons for social links, follow button with Framer Motion hover effects. Include lift animations and smooth transitions.' -i 2 -o card_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py card_result.json card_preview.html
 	@echo "🌐 Opening card preview in browser..."
 	@which open >/dev/null && open card_preview.html || echo "   Run: open card_preview.html"
 
 toggle:
-	@echo "🔀 Creating toggle switch..."
-	$(PYTHON) main.py -r 'Create a sleek toggle switch component with smooth animations, keyboard support, customizable colors, and proper accessibility. Include both controlled and uncontrolled modes.' -i 1 -o toggle_result.json
+	@echo "🔀 Creating animated toggle switch..."
+	$(PYTHON) main.py -r 'Create a sleek toggle switch with Framer Motion spring animations, Heroicons for states, smooth color transitions, keyboard support, and proper accessibility. Include satisfying haptic-like motion.' -i 2 -o toggle_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py toggle_result.json toggle_preview.html
 	@echo "🌐 Opening toggle preview in browser..."
 	@which open >/dev/null && open toggle_preview.html || echo "   Run: open toggle_preview.html"
 
 table:
-	@echo "📊 Creating data table..."
-	$(PYTHON) main.py -r 'Create a data table component with sortable columns and pagination. Implement everything inline using only react, lodash, and tailwind CSS. No external libraries or component imports.' -i 1 -o table_result.json
+	@echo "📊 Creating animated data table..."
+	$(PYTHON) main.py -r 'Create a data table with sortable columns, pagination, Heroicons for sorting/actions, and Framer Motion animations. Include row hover effects, smooth sorting transitions, and loading states.' -i 2 -o table_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py table_result.json table_preview.html
 	@echo "🌐 Opening table preview in browser..."
@@ -174,30 +178,30 @@ table:
 
 # PURE Framework examples
 pure-button:
-	@echo "🎯 Creating button with PURE framework..."
+	@echo "🎯 Creating animated button with PURE framework..."
 	@echo "Note: Make sure GEMINI_API_KEY is set in your environment"
-	$(PYTHON) main.py -r 'Create a modern button component with multiple variants, loading states, and accessibility features' --pure -i 1 -o pure_button_result.json
+	$(PYTHON) main.py -r 'Create a modern button component with Heroicons, Framer Motion animations, multiple variants, loading states, and accessibility features' --pure -i 2 -o pure_button_result.json
 	$(PYTHON) unified_preview_generator.py pure_button_result.json pure_button_preview.html
 	@which open >/dev/null && open pure_button_preview.html || echo "   Run: open pure_button_preview.html"
 
 pure-card:
-	@echo "🎯 Creating card with PURE framework..."
-	$(PYTHON) main.py -r 'Create a user profile card component with avatar, content, and actions' --pure -i 1 -o pure_card_result.json
+	@echo "🎯 Creating animated card with PURE framework..."
+	$(PYTHON) main.py -r 'Create a user profile card component with Heroicons, Framer Motion hover effects, avatar, content, and interactive actions' --pure -i 2 -o pure_card_result.json
 	$(PYTHON) unified_preview_generator.py pure_card_result.json pure_card_preview.html
 	@which open >/dev/null && open pure_card_preview.html || echo "   Run: open pure_card_preview.html"
 
-# Advanced examples
+# Advanced animated examples
 modal:
-	@echo "🪟 Creating modal component..."
-	$(PYTHON) main.py -r "Create a flexible modal component with backdrop, close button, keyboard escape, focus management, animation, and portal rendering. Support different sizes and accessibility." -i 1 -o modal_result.json
+	@echo "🪟 Creating animated modal component..."
+	$(PYTHON) main.py -r "Create a flexible modal with Framer Motion entrance/exit animations, Heroicons for close button, backdrop blur, keyboard escape, focus management, and portal rendering. Include slide-in and fade effects." -i 2 -o modal_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py modal_result.json modal_preview.html
 	@echo "🌐 Opening modal preview in browser..."
 	@which open >/dev/null && open modal_preview.html || echo "   Run: open modal_preview.html"
 
 form:
-	@echo "📝 Creating form component..."
-	$(PYTHON) main.py -r "Create a comprehensive form component with validation, error handling, different input types, submit states, and accessibility. Include form hooks and TypeScript support." -i 1 -o form_result.json
+	@echo "📝 Creating animated form component..."
+	$(PYTHON) main.py -r "Create a comprehensive form with Framer Motion field animations, Heroicons for validation states, smooth error transitions, different input types, submit states, and accessibility. Include focus animations and loading states." -i 2 -o form_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py form_result.json form_preview.html
 	@echo "🌐 Opening form preview in browser..."
@@ -205,13 +209,13 @@ form:
 
 # Development helpers
 quick-test:
-	@echo "⚡ Quick test with minimal component..."
-	$(PYTHON) main.py -r 'Create a simple div with hello world text' -i 1 -o quick_test.json
+	@echo "⚡ Quick test with animated component..."
+	$(PYTHON) main.py -r 'Create a simple button with Heroicons and Framer Motion hover animation' -i 1 -o quick_test.json
 
 # Simple test that should work immediately
 simple:
-	@echo "🔥 Running simple end-to-end test..."
-	$(PYTHON) main.py -r 'Create a simple button' -i 1 -o simple_result.json
+	@echo "🔥 Running simple animated end-to-end test..."
+	$(PYTHON) main.py -r 'Create a beautiful button with Heroicons and smooth Framer Motion animations' -i 2 -o simple_result.json
 	@echo ""
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py simple_result.json simple_preview.html
@@ -266,7 +270,9 @@ health-check:
 	@echo "Checking OpenUI connection..."
 	@curl -s http://localhost:7878 > /dev/null && echo "✅ OpenUI is running" || echo "❌ OpenUI not accessible"
 	@echo "Checking Python dependencies..."
-	@$(PYTHON) -c "import crewai, google.generativeai, requests, selenium; print('✅ All dependencies installed')" 2>/dev/null || echo "❌ Missing dependencies"
+	@$(PYTHON) -c "import crewai, google.generativeai, requests, selenium; print('✅ All Python dependencies installed')" 2>/dev/null || echo "❌ Missing Python dependencies"
+	@echo "Checking Node.js dependencies..."
+	@[ -d node_modules ] && echo "✅ Node.js dependencies installed" || echo "❌ Missing Node.js dependencies (run npm install)"
 	@echo "Checking cookie file..."
 	@[ -f openui_cookies.json ] && echo "✅ Cookies file exists" || echo "❌ No cookies file (run make get-cookies)"
 

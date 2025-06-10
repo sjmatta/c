@@ -23,9 +23,9 @@ def main():
     """Main application entry point"""
     parser = argparse.ArgumentParser(description='Create amazing React components using OpenUI + CrewAI + Gemini')
     parser.add_argument('--requirements', '-r', 
-                        default="Create a modern, accessible button component with loading states and animations",
+                        default="Create a beautiful user profile card with avatar, name, title, bio, and action buttons. Include hover animations and professional icons.",
                         help='Component requirements description')
-    parser.add_argument('--iterations', '-i', type=int, default=1,
+    parser.add_argument('--iterations', '-i', type=int, default=2,
                         help='Maximum number of refinement iterations')
     parser.add_argument('--output', '-o', default="component_result.json",
                         help='Output file for results')

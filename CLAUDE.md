@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an **intelligent React component creation system** that integrates OpenUI, CrewAI, and Google Gemini to automatically generate, analyze, and refine React components through iterative improvement workflows. The system now includes enhanced design capabilities with **icon library integration** and **AI-generated placeholder images** for richer component development.
+This is an **intelligent React component creation system** that integrates OpenUI, CrewAI, and Google Gemini to automatically generate, analyze, and refine React components through iterative improvement workflows. The system now includes **Heroicons and Framer Motion integration** for professional animations and icons, perfect for hackathon prototyping.
 
 ## Core Architecture
 
@@ -21,11 +21,12 @@ The system uses CrewAI to orchestrate specialized agents in `crew_agents.py`:
 
 **Note**: Test generation has been removed for simplified workflow. Iterative improvements are disabled but Nova provides detailed PURE methodology evaluation.
 
-### Enhanced Design Capabilities
-- **Icon Library Manager** (`icon_library.py`): Provides context-aware icon suggestions for Heroicons, Lucide React, and Tabler Icons
-- **AI-Generated Images**: Uses contextual placeholder images via placehold.co with component-specific colors and text
-- **Component Type Detection**: Automatically identifies component types (button, table, card, form, navigation) for targeted enhancement
-- **Rich Metadata Output**: Enhanced result structure includes icon suggestions, image URLs, and enhancement recommendations
+### Enhanced Design Capabilities (Hackathon Edition)
+- **Heroicons Integration**: Professional icon system with `@heroicons/react` package
+- **Framer Motion Animations**: Smooth animations, hover effects, and micro-interactions
+- **No Security Restrictions**: Relaxed dependency validation for rapid prototyping
+- **Enhanced Prompts**: Specific examples for animations and icon usage
+- **Better Defaults**: 2 iterations, user profile card demo, professional styling patterns
 
 ### Analysis Frameworks
 Two analysis approaches are available:

@@ -197,47 +197,54 @@ import { Pagination } from './components/Pagination';
         # Get placeholder image URL if needed
         placeholder_image = self.gemini_client.generate_placeholder_image_url(component_type, requirements)
         
-        # Generate enhanced prompt with icon and image capabilities
+        # Generate enhanced prompt with new libraries
         enhanced_prompt = f"""Create a React component: {requirements}
 
-🎨 MODERN BEAUTIFUL DESIGN - Make components visually stunning:
+🎨 MODERN BEAUTIFUL DESIGN with animations and professional icons:
+
+**AVAILABLE LIBRARIES:**
+- Heroicons: import {{ UserIcon, ChevronDownIcon, HeartIcon }} from '@heroicons/react/24/outline'
+- Framer Motion: import {{ motion }} from 'framer-motion'
+- React + Tailwind CSS
 
 **ESSENTIAL STYLING:**
-- Tables: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
-- Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 font-semibold text-slate-900 uppercase"
-- ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50 hover:bg-blue-50/50 transition-colors duration-200"
-- Buttons: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-- Pagination: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold shadow-lg" (active), "bg-white border-2 border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-200" (inactive)
+- Modern Cards: "bg-white rounded-xl border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+- Beautiful Buttons: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-200"
+- Professional Tables: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+- Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 font-semibold text-slate-900"
+- Hover Effects: "hover:bg-blue-50 hover:scale-[1.02] transition-all duration-200"
 
-**ICON INTEGRATION:**
-Use Unicode/emoji icons for visual enhancement:
-- Sorting: ▲ ▼ (up/down arrows)
-- Navigation: ← → ↑ ↓ (directional arrows)  
-- Actions: ✓ ✕ ⚙️ 🔍 ❤️ ⭐ 📤 (check, close, settings, search, heart, star, share)
-- Status: ⚠️ ✅ ❌ ℹ️ (warning, success, error, info)
-- User: 👤 (user icon)
-- Menu: ☰ (hamburger menu)
+**HERO ICONS (use instead of emojis):**
+- User/Profile: <UserIcon className="w-5 h-5" />
+- Navigation: <ChevronDownIcon className="w-4 h-4" />
+- Actions: <HeartIcon className="w-5 h-5" />
+- Settings: <CogIcon className="w-5 h-5" />
+- Search: <MagnifyingGlassIcon className="w-5 h-5" />
+
+**FRAMER MOTION ANIMATIONS:**
+- Hover buttons: <motion.button whileHover={{{{ scale: 1.05 }}}} whileTap={{{{ scale: 0.95 }}}}>
+- Fade in cards: <motion.div initial={{{{ opacity: 0, y: 20 }}}} animate={{{{ opacity: 1, y: 0 }}}}>
+- Loading spinner: <motion.div animate={{{{ rotate: 360 }}}} transition={{{{ repeat: Infinity, duration: 1 }}}}>
+- Stagger animations: <motion.div variants={{{{ container: {{ staggerChildren: 0.1 }} }}}}>
 
 **PLACEHOLDER IMAGES:**
-- Use contextual placeholder: {placeholder_image}
-- Service: placehold.co with component-specific colors and text
-- Image styling: "rounded-lg object-cover shadow-md" for thumbnails
-- Avatar styling: "rounded-full object-cover border-2 border-white shadow-lg"
+- Use: {placeholder_image}
+- Style: "rounded-lg object-cover shadow-md"
 
 **REQUIREMENTS:**
-- Use rich colors: blue-600, indigo-600, purple-600, emerald-600, slate-50/100/200/700/800
-- ALL interactive elements need "transition-all duration-200"
-- Use gradients, shadows, hover effects, transforms
-- Include Unicode icons where appropriate for better UX
-- CRITICAL: All .map() functions MUST have unique key props (use item.id, index, or item.key)
-- Use placeholder image URL when images are needed
+- Use Heroicons for ALL icons (no emojis!)
+- Add motion.div/button for smooth animations
+- Rich colors: blue-600, indigo-600, purple-600, emerald-600
+- ALL interactive elements get hover animations
+- CRITICAL: All .map() functions MUST have unique key props
 
-🚨 DEPENDENCIES: Only use react, lodash (_), Tailwind CSS. Use Unicode/emoji for icons. NO external libraries.
-
-Return TypeScript functional component with beautiful styling and icons:
+Return TypeScript functional component with Heroicons + Framer Motion:
 ```jsx
 import React from 'react';
-// Component with stunning Tailwind classes and Unicode icons
+import {{ UserIcon, ChevronDownIcon }} from '@heroicons/react/24/outline';
+import {{ motion }} from 'framer-motion';
+
+// Component with professional icons and smooth animations
 ```"""
         
         print(f"🎯 Component type detected: {component_type}")
@@ -293,7 +300,7 @@ import React from 'react';
         """Refine component based on improvements"""
         print("✨ Refining component...")
         
-        refinement_prompt = f"""Improve this React component:
+        refinement_prompt = f"""Improve this React component with STUNNING visual polish:
 
 CURRENT COMPONENT:
 ```jsx
@@ -306,16 +313,23 @@ ANALYSIS: {analysis}
 
 IMPROVEMENTS: {improvements}
 
-🎨 MAKE IT BEAUTIFUL - Apply stunning modern design:
-- Tables: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
-- Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 font-semibold text-slate-900 uppercase"
-- ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50 hover:bg-blue-50/50 transition-colors duration-200"
-- Buttons: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-- Pagination: Active "bg-gradient-to-r from-blue-600 to-blue-700 text-white", Inactive "bg-white border-2 border-slate-200 hover:border-blue-300"
+🎨 VISUAL UPGRADE PRIORITIES:
+1. **Replace ALL emojis with Heroicons**: import {{ UserIcon, HeartIcon }} from '@heroicons/react/24/outline'
+2. **Add Framer Motion animations**: import {{ motion }} from 'framer-motion'
+3. **Modern shadows & gradients**: "shadow-xl", "bg-gradient-to-r from-blue-600 to-blue-700"
+4. **Smooth hover effects**: whileHover={{{{ scale: 1.05, y: -2 }}}}
+5. **Perfect spacing**: Use consistent px-6 py-4, gap-4, space-y-4
 
-🚨 DEPENDENCIES: Only react, lodash (_), Tailwind CSS. NO external libraries.
+**ANIMATION EXAMPLES:**
+- Buttons: <motion.button whileHover={{{{ scale: 1.05 }}}} whileTap={{{{ scale: 0.95 }}}}>
+- Cards: <motion.div whileHover={{{{ y: -4 }}}} transition={{{{ duration: 0.2 }}}}>
+- Icons: <motion.div whileHover={{{{ rotate: 10 }}}}>
 
-Return improved component with beautiful styling and all suggested improvements implemented."""
+**STYLING EXAMPLES:**
+- Premium buttons: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+- Modern cards: "bg-white rounded-2xl border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 p-6"
+
+Return the improved component that looks absolutely stunning with Heroicons + Framer Motion."""
         
         return self.openui_client.create_component(refinement_prompt)
     

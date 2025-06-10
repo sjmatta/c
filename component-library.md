@@ -1,26 +1,43 @@
 # Component Library Reference
 
-This document defines the reusable components and **APPROVED DEPENDENCIES** available for AI generation. 
+This document defines the available libraries and components for AI generation.
 
-## 🚨 CRITICAL: Approved Dependencies Only
+## 📦 Available Libraries
 
-You MUST only use these pre-approved libraries. DO NOT import any other libraries:
-
-### Available NPM Packages:
-- `react` - React library (included globally)
-- `react-dom` - React DOM (included globally)  
+### Core React:
+- `react` - React library
+- `react-dom` - React DOM
 - `lodash` - Utility library (available as global `_`)
 
+### UI Enhancement:
+- `@heroicons/react/24/outline` - Beautiful outline icons
+- `@heroicons/react/24/solid` - Beautiful solid icons  
+- `framer-motion` - Smooth animations and transitions
+
 ### CSS Framework:
-- **Tailwind CSS** - Use ONLY Tailwind classes (included via CDN)
+- **Tailwind CSS** - Complete utility-first CSS framework
 
-### NOT ALLOWED:
-- ❌ `react-table` - Use manual table logic with Tailwind styling
-- ❌ `moment` - Use native Date or lodash for date operations
-- ❌ `d3` - Use CSS transforms and manual calculations
-- ❌ Any other external libraries
+## 🎨 Quick Examples
 
-If you need functionality from a non-approved library, implement it manually using the approved dependencies above.
+### Using Heroicons:
+```jsx
+import { UserIcon, ChevronDownIcon, HeartIcon } from '@heroicons/react/24/outline'
+
+<UserIcon className="w-5 h-5 text-blue-600" />
+```
+
+### Using Framer Motion:
+```jsx
+import { motion } from 'framer-motion'
+
+<motion.button 
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  className="bg-blue-600 text-white px-4 py-2 rounded"
+>
+  Click me!
+</motion.button>
+```
 
 ## Available Components
 
