@@ -377,6 +377,11 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     
+    <script>
+        // Make React hooks available globally for transpiled components
+        const { useState, useEffect, useRef, useMemo, useCallback, useContext, useReducer } = React;
+    </script>
+    
     <!-- PropTypes -->
     <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
     
