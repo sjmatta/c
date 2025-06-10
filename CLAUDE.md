@@ -4,21 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an **intelligent React component creation system** that integrates OpenUI, CrewAI, and Google Gemini to automatically generate, analyze, and refine React components through iterative improvement workflows.
+This is an **intelligent React component creation system** that integrates OpenUI, CrewAI, and Google Gemini to automatically generate, analyze, and refine React components through iterative improvement workflows. The system now includes enhanced design capabilities with **icon library integration** and **AI-generated placeholder images** for richer component development.
 
 ## Core Architecture
 
 ### Multi-Service Integration
 - **OpenUI** (localhost:7878): Component generation via `/v1/chat/completions` with SSE streaming
-- **CrewAI**: Multi-agent orchestration system with 4 specialized agents
+- **CrewAI**: Multi-agent orchestration system with 3 specialized agents
 - **Google Gemini**: Deep component analysis using either Standard or PURE framework
 
 ### Agent System Design
 The system uses CrewAI to orchestrate specialized agents in `crew_agents.py`:
-- **Aria** (Component Designer): Interfaces with OpenUI for initial component generation
+- **Aria** (Component Designer): Interfaces with OpenUI for initial component generation with enhanced design capabilities
 - **Phoenix/Quinn** (Quality Analyst): Performs quality assessment (configurable framework)
-- **Sage** (Test Engineer): Generates comprehensive Jest/RTL test suites  
-- **Nova** (Refiner): Iteratively improves components based on analysis feedback
+- **Nova** (Refiner): Iteratively improves components based on analysis feedback (currently disabled to prevent token overflow)
+
+**Note**: Test generation has been removed for simplified workflow.
+
+### Enhanced Design Capabilities
+- **Icon Library Manager** (`icon_library.py`): Provides context-aware icon suggestions for Heroicons, Lucide React, and Tabler Icons
+- **AI-Generated Images**: Uses contextual placeholder images via placehold.co with component-specific colors and text
+- **Component Type Detection**: Automatically identifies component types (button, table, card, form, navigation) for targeted enhancement
+- **Rich Metadata Output**: Enhanced result structure includes icon suggestions, image URLs, and enhancement recommendations
 
 ### Analysis Frameworks
 Two analysis approaches are available:
@@ -135,17 +142,37 @@ Two preview systems are available:
 ## Output Structure
 
 Generated files follow consistent patterns:
-- `component_result.json`: Complete analysis with code, scores, tests
+- `component_result.json`: Complete analysis with code, scores, tests, and enhanced metadata
 - `preview.html`: Interactive component demonstration
 - Framework-specific outputs: `pure_*.json`, `pure_*.html`
 
+### Enhanced Output Structure
+The system now generates enriched metadata:
+```json
+{
+  "component_code": "...",
+  "final_analysis": "...", 
+  "final_score": 8.5,
+  "iterations": 1,
+  "component_type": "table|button|card|form|navigation",
+  "enhancement_suggestions": "AI-generated improvement recommendations",
+  "icon_suggestions": {
+    "primary_library": "heroicons",
+    "icons": [{"name": "ChevronDownIcon", "usage": "...", "accessibility": "..."}],
+    "import_statements": ["import { ChevronDownIcon } from '@heroicons/react/24/outline'"]
+  },
+  "placeholder_images": {
+    "primary": "https://placehold.co/400x300/8B5CF6/FFFFFF?text=Card",
+    "alternatives": ["300x200 variant", "600x400 variant"]
+  }
+}
+```
+
+**Note**: The `"tests"` field has been removed as test generation is disabled.
+
 ## Testing Strategy
 
-The system generates and executes multiple test types:
-- **Unit Tests**: Jest/React Testing Library for component behavior
-- **Accessibility Tests**: ARIA compliance, keyboard navigation, screen reader support
-- **Integration Tests**: End-to-end workflow validation
-- **Performance Tests**: Timing benchmarks and resource usage
+**Note**: Test generation has been disabled for simplified workflow. The system focuses on component generation and analysis without automated test creation.
 
 ## Development Notes
 

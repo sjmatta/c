@@ -130,6 +130,46 @@ class GeminiClient:
             print(f"Gemini test generation failed: {e}")
             return None
     
+    def generate_placeholder_image_url(self, component_type, context="", width=400, height=300):
+        """Generate appropriate placeholder image URL using placehold.co"""
+        # Create appropriate text and colors based on component type
+        text_map = {
+            'button': 'Button',
+            'card': 'Card',
+            'table': 'Table', 
+            'form': 'Form',
+            'hero': 'Hero',
+            'banner': 'Banner',
+            'profile': 'Profile',
+            'user': 'User',
+            'product': 'Product',
+            'navigation': 'Nav',
+            'gallery': 'Gallery'
+        }
+        
+        color_map = {
+            'button': '3B82F6/FFFFFF',  # Blue
+            'card': '8B5CF6/FFFFFF',    # Purple
+            'table': '10B981/FFFFFF',   # Green
+            'form': 'F59E0B/FFFFFF',    # Amber
+            'hero': '6366F1/FFFFFF',    # Indigo
+            'banner': '6366F1/FFFFFF',  # Indigo
+            'profile': 'EC4899/FFFFFF', # Pink
+            'user': 'EC4899/FFFFFF',    # Pink
+            'product': 'EF4444/FFFFFF', # Red
+            'navigation': '6B7280/FFFFFF', # Gray
+            'gallery': '059669/FFFFFF'  # Emerald
+        }
+        
+        # Get text and colors for component type
+        display_text = text_map.get(component_type.lower(), component_type.title())
+        colors = color_map.get(component_type.lower(), '3B82F6/FFFFFF')
+        
+        # Generate placehold.co URL
+        return f"https://placehold.co/{width}x{height}/{colors}?text={display_text}"
+    
+# Unsplash keywords method removed - using only placehold.co
+
     def generate_placeholder_image_description(self, component_type, context=""):
         """Generate description for AI-generated placeholder images"""
         prompt = f"""
@@ -176,13 +216,19 @@ class GeminiClient:
         ```
         
         Provide suggestions for:
-        1. **Icons**: Which Heroicons would enhance this component? Be specific with icon names.
-        2. **Images**: What kind of placeholder images would improve the design?
+        1. **Icons**: Which Heroicons/Lucide React icons would enhance this component? Be specific with icon names and placement.
+        2. **Images**: What kind of placeholder images would improve the design? Include specific URLs.
         3. **Content**: Suggest realistic sample content (text, data, etc.)
         4. **Animations**: What Tailwind animations would enhance UX?
         5. **Variants**: What style variants would be useful?
+        6. **Accessibility**: Icon accessibility improvements (alt text, aria-labels)
         
-        Format as actionable recommendations a developer can implement.
+        Available Icon Libraries:
+        - Heroicons (outline, solid): ChevronDownIcon, UserIcon, HeartIcon, etc.
+        - Lucide React: ChevronDown, User, Heart, Search, Settings, etc.
+        - Tabler Icons: icon-chevron-down, icon-user, icon-heart, etc.
+        
+        Format as actionable recommendations with specific implementation code snippets.
         """
         
         try:
@@ -191,6 +237,77 @@ class GeminiClient:
         except Exception as e:
             print(f"Gemini enhancement suggestions failed: {e}")
             return None
+    
+    def suggest_icons_for_component(self, component_code, component_type):
+        """Suggest specific icons for a component with implementation details"""
+        prompt = f"""
+        Suggest specific icons for this {component_type} component:
+        
+        ```jsx
+        {component_code}
+        ```
+        
+        Provide:
+        1. **Heroicons suggestions** with exact icon names and where to place them
+        2. **Lucide React alternatives** 
+        3. **Implementation code** showing how to integrate the icons
+        4. **Accessibility considerations** for each icon
+        
+        Focus on:
+        - User interaction cues (arrows, chevrons, plus/minus)
+        - Status indicators (check, warning, info, error)
+        - Navigation aids (home, back, forward, menu)
+        - Content types (user, settings, search, filter)
+        
+        Return as structured JSON:
+        {{
+            "suggested_icons": [
+                {{
+                    "icon_name": "ChevronDownIcon",
+                    "library": "heroicons",
+                    "placement": "sort indicator",
+                    "implementation": "<ChevronDownIcon className='w-4 h-4' />",
+                    "aria_label": "Sort descending"
+                }}
+            ],
+            "cdn_links": ["https://heroicons.com", "https://lucide.dev"],
+            "import_statements": ["import {{ ChevronDownIcon }} from '@heroicons/react/24/outline'"]
+        }}
+        """
+        
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            print(f"Gemini icon suggestions failed: {e}")
+            return self._get_fallback_icons(component_type)
+    
+    def _get_fallback_icons(self, component_type):
+        """Provide fallback icon suggestions when Gemini fails"""
+        fallback_icons = {
+            'button': {
+                'suggested_icons': [
+                    {'icon_name': 'ChevronRightIcon', 'library': 'heroicons', 'placement': 'action indicator'},
+                    {'icon_name': 'PlusIcon', 'library': 'heroicons', 'placement': 'add action'}
+                ]
+            },
+            'table': {
+                'suggested_icons': [
+                    {'icon_name': 'ChevronUpIcon', 'library': 'heroicons', 'placement': 'sort ascending'},
+                    {'icon_name': 'ChevronDownIcon', 'library': 'heroicons', 'placement': 'sort descending'},
+                    {'icon_name': 'FunnelIcon', 'library': 'heroicons', 'placement': 'filter'}
+                ]
+            },
+            'card': {
+                'suggested_icons': [
+                    {'icon_name': 'UserIcon', 'library': 'heroicons', 'placement': 'profile indicator'},
+                    {'icon_name': 'HeartIcon', 'library': 'heroicons', 'placement': 'favorite action'},
+                    {'icon_name': 'ShareIcon', 'library': 'heroicons', 'placement': 'share action'}
+                ]
+            }
+        }
+        
+        return str(fallback_icons.get(component_type.lower(), fallback_icons['button']))
 
 
 def test_gemini_client():

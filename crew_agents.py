@@ -7,6 +7,7 @@ from crewai import Agent, Task, Crew, Process
 from openui_client import OpenUIClient
 from gemini_client import GeminiClient
 from pure_analyst import PureFrameworkAnalyst
+from icon_library import IconLibraryManager
 import json
 import re
 import os
@@ -16,6 +17,7 @@ class ComponentCreationCrew:
     def __init__(self, use_pure_framework=None):
         self.openui_client = OpenUIClient()
         self.gemini_client = GeminiClient()
+        self.icon_manager = IconLibraryManager()
         
         # Determine which analyst to use
         if use_pure_framework is None:
@@ -30,6 +32,8 @@ class ComponentCreationCrew:
         else:
             self.pure_analyst = None
             print("🔍 Using Standard Quality Analyst")
+        
+        print("🎨 Icon library and image generation enabled")
         
         # Define agents
         self.component_designer = Agent(
@@ -67,16 +71,7 @@ class ComponentCreationCrew:
                 allow_delegation=False
             )
         
-        self.test_engineer = Agent(
-            role='Sage - Test Automation Engineer',
-            goal='Create comprehensive test suites for React components',
-            backstory="""You are Sage, a test automation expert who creates thorough test 
-            coverage including unit tests, integration tests, accessibility tests, 
-            and edge case scenarios. You believe that every great component needs great tests,
-            and your wisdom comes from preventing bugs before they happen.""",
-            verbose=True,
-            allow_delegation=False
-        )
+# Test automation agent removed for simplified workflow
         
         self.refiner = Agent(
             role='Nova - Component Refinement Specialist',
@@ -125,16 +120,32 @@ class ComponentCreationCrew:
             
             iteration += 1
         
-        # Final result
+        # Final result with enhanced metadata
         final_analysis = self._analyze_component(component_code, requirements)
         final_score = self._extract_score(final_analysis)
+        
+        # Extract component type for metadata
+        component_type = self._extract_component_type(requirements)
+        
+        # Get enhancement suggestions
+        enhancement_suggestions = self.gemini_client.suggest_component_enhancements(component_code, component_type)
+        icon_suggestions = self.icon_manager.get_icon_suggestions(component_type)
         
         result = {
             "component_code": component_code,
             "final_analysis": final_analysis,
             "final_score": final_score,
             "iterations": iteration - 1,
-            "tests": self._generate_tests(component_code, requirements)
+            "component_type": component_type,
+            "enhancement_suggestions": enhancement_suggestions,
+            "icon_suggestions": icon_suggestions,
+            "placeholder_images": {
+                "primary": self.gemini_client.generate_placeholder_image_url(component_type, requirements),
+                "alternatives": [
+                    self.gemini_client.generate_placeholder_image_url(component_type, requirements, 300, 200),
+                    self.gemini_client.generate_placeholder_image_url(component_type, requirements, 600, 400)
+                ]
+            }
         }
         
         return result
@@ -167,9 +178,19 @@ import { Pagination } from './components/Pagination';
 """
     
     def _generate_initial_component(self, requirements):
-        """Generate initial component using OpenUI"""
+        """Generate initial component using OpenUI with enhanced design capabilities"""
         print("🎨 Generating initial component with OpenUI...")
         
+        # Determine component type for context-aware generation
+        component_type = self._extract_component_type(requirements)
+        
+        # Get icon suggestions
+        icon_suggestions = self.icon_manager.get_icon_suggestions(component_type)
+        
+        # Get placeholder image URL if needed
+        placeholder_image = self.gemini_client.generate_placeholder_image_url(component_type, requirements)
+        
+        # Generate enhanced prompt with icon and image capabilities
         enhanced_prompt = f"""Create a React component: {requirements}
 
 🎨 MODERN BEAUTIFUL DESIGN - Make components visually stunning:
@@ -181,22 +202,63 @@ import { Pagination } from './components/Pagination';
 - Buttons: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
 - Pagination: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold shadow-lg" (active), "bg-white border-2 border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-200" (inactive)
 
+**ICON INTEGRATION:**
+Use Unicode/emoji icons for visual enhancement:
+- Sorting: ▲ ▼ (up/down arrows)
+- Navigation: ← → ↑ ↓ (directional arrows)  
+- Actions: ✓ ✕ ⚙️ 🔍 ❤️ ⭐ 📤 (check, close, settings, search, heart, star, share)
+- Status: ⚠️ ✅ ❌ ℹ️ (warning, success, error, info)
+- User: 👤 (user icon)
+- Menu: ☰ (hamburger menu)
+
+**PLACEHOLDER IMAGES:**
+- Use contextual placeholder: {placeholder_image}
+- Service: placehold.co with component-specific colors and text
+- Image styling: "rounded-lg object-cover shadow-md" for thumbnails
+- Avatar styling: "rounded-full object-cover border-2 border-white shadow-lg"
+
 **REQUIREMENTS:**
 - Use rich colors: blue-600, indigo-600, purple-600, emerald-600, slate-50/100/200/700/800
 - ALL interactive elements need "transition-all duration-200"
 - Use gradients, shadows, hover effects, transforms
-- Icons: ▲▼ for sorting, ←→ for navigation
+- Include Unicode icons where appropriate for better UX
 - CRITICAL: All .map() functions MUST have unique key props (use item.id, index, or item.key)
+- Use placeholder image URL when images are needed
 
-🚨 DEPENDENCIES: Only use react, lodash (_), Tailwind CSS. NO external libraries.
+🚨 DEPENDENCIES: Only use react, lodash (_), Tailwind CSS. Use Unicode/emoji for icons. NO external libraries.
 
-Return TypeScript functional component with beautiful styling:
+Return TypeScript functional component with beautiful styling and icons:
 ```jsx
 import React from 'react';
-// Component with stunning Tailwind classes
+// Component with stunning Tailwind classes and Unicode icons
 ```"""
         
+        print(f"🎯 Component type detected: {component_type}")
+        print(f"🖼️  Placeholder image: {placeholder_image}")
+        print(f"🎨 Available icons: {len(icon_suggestions['icons'])} suggestions")
+        
         return self.openui_client.create_component(enhanced_prompt)
+    
+    def _extract_component_type(self, requirements):
+        """Extract component type from requirements for context-aware generation"""
+        requirements_lower = requirements.lower()
+        
+        type_keywords = {
+            'button': ['button', 'btn'],
+            'table': ['table', 'datatable', 'grid', 'list'],
+            'card': ['card', 'profile', 'user'],
+            'form': ['form', 'input', 'field'],
+            'navigation': ['nav', 'menu', 'header', 'sidebar'],
+            'modal': ['modal', 'dialog', 'popup'],
+            'hero': ['hero', 'banner', 'header'],
+            'gallery': ['gallery', 'image', 'photo']
+        }
+        
+        for component_type, keywords in type_keywords.items():
+            if any(keyword in requirements_lower for keyword in keywords):
+                return component_type
+        
+        return 'default'
     
     def _analyze_component(self, component_code, requirements):
         """Analyze component using either PURE framework or standard analysis"""
@@ -216,12 +278,9 @@ import React from 'react';
             return self.gemini_client.suggest_improvements(component_code, analysis)
     
     def _generate_tests(self, component_code, requirements):
-        """Generate test cases using appropriate analyst"""
-        print("🧪 Generating test cases...")
-        if self.use_pure_framework:
-            return self.pure_analyst.generate_pure_tests(component_code, requirements)
-        else:
-            return self.gemini_client.create_test_cases(component_code, requirements)
+        """Test generation disabled - return placeholder"""
+        print("⏭️  Test generation disabled")
+        return "Test generation has been disabled for simplified workflow."
     
     def _refine_component(self, component_code, requirements, improvements, analysis):
         """Refine component based on improvements"""
@@ -304,13 +363,15 @@ def test_crew():
     """
     
     print("🎯 Testing component creation crew...")
-    result = crew.create_component(requirements, max_iterations=2)
+    result = crew.create_component(requirements, max_iterations=1)
     
     if result:
         print(f"\n✅ Component creation completed!")
         print(f"Final score: {result['final_score']}/10")
         print(f"Iterations: {result['iterations']}")
+        print(f"Component type: {result['component_type']}")
         print(f"Component code length: {len(result['component_code'])} characters")
+        print(f"Icon suggestions: {len(result['icon_suggestions']['icons'])}")
         return True
     else:
         print("\n❌ Component creation failed")
