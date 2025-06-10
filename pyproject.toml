@@ -1,0 +1,13 @@
+[project]
+name = "openui-integration"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "crewai>=0.126.0",
+    "google-generativeai>=0.8.5",
+    "requests>=2.32.4",
+    "selenium>=4.33.0",
+    "sseclient-py>=1.8.0",
+]
