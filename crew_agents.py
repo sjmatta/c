@@ -6,14 +6,31 @@ CrewAI agents for component creation, testing, and refinement
 from crewai import Agent, Task, Crew, Process
 from openui_client import OpenUIClient
 from gemini_client import GeminiClient
+from pure_analyst import PureFrameworkAnalyst
 import json
 import re
+import os
 
 
 class ComponentCreationCrew:
-    def __init__(self):
+    def __init__(self, use_pure_framework=None):
         self.openui_client = OpenUIClient()
         self.gemini_client = GeminiClient()
+        
+        # Determine which analyst to use
+        if use_pure_framework is None:
+            use_pure_framework = os.getenv('USE_PURE_FRAMEWORK', 'false').lower() in ['true', '1', 'yes']
+        
+        self.use_pure_framework = use_pure_framework
+        if use_pure_framework:
+            # Pass API key to PURE analyst to ensure it works
+            import os
+            api_key = os.getenv('GEMINI_API_KEY')
+            self.pure_analyst = PureFrameworkAnalyst(api_key=api_key)
+            print("🎯 Using PURE Framework Analyst (Purposeful, Usable, Readable, Extensible)")
+        else:
+            self.pure_analyst = None
+            print("🔍 Using Standard Quality Analyst")
         
         # Define agents
         self.component_designer = Agent(
@@ -26,15 +43,27 @@ class ComponentCreationCrew:
             allow_delegation=False
         )
         
-        self.quality_analyst = Agent(
-            role='Code Quality and UX Analyst',
-            goal='Analyze components for quality, usability, and adherence to best practices',
-            backstory="""You are a meticulous quality analyst who reviews code for 
-            functionality, performance, accessibility, and user experience. You catch 
-            issues others miss and provide actionable improvement suggestions.""",
-            verbose=True,
-            allow_delegation=False
-        )
+        if use_pure_framework:
+            self.quality_analyst = Agent(
+                role='PURE Framework Quality Analyst',
+                goal='Analyze components using PURE framework: Purposeful, Usable, Readable, Extensible',
+                backstory="""You are a PURE framework specialist who evaluates components across 
+                four key dimensions: Purposeful (solves the right problem), Usable (intuitive and 
+                accessible), Readable (clear and maintainable code), and Extensible (flexible and 
+                future-proof). You provide structured analysis with actionable improvements.""",
+                verbose=True,
+                allow_delegation=False
+            )
+        else:
+            self.quality_analyst = Agent(
+                role='Code Quality and UX Analyst',
+                goal='Analyze components for quality, usability, and adherence to best practices',
+                backstory="""You are a meticulous quality analyst who reviews code for 
+                functionality, performance, accessibility, and user experience. You catch 
+                issues others miss and provide actionable improvement suggestions.""",
+                verbose=True,
+                allow_delegation=False
+            )
         
         self.test_engineer = Agent(
             role='Test Automation Engineer',
@@ -126,31 +155,59 @@ class ComponentCreationCrew:
         Create a React component with the following requirements:
         {requirements}
         
-        Please ensure the component:
+        Please provide both the React component AND the CSS styling.
+        
+        Component requirements:
         - Follows modern React best practices
         - Is accessible (ARIA labels, keyboard navigation)
         - Has proper TypeScript types if applicable
         - Includes hover/focus states
         - Is responsive
         - Has clean, readable code structure
+        
+        CSS requirements:
+        - Include comprehensive CSS styling for all component states
+        - Use modern CSS features (flexbox, grid, transitions, etc.)
+        - Include hover, focus, active, and disabled states
+        - Make it visually appealing and professional
+        - Support component variants (primary, secondary, etc.) if applicable
+        
+        Format the response with separate code blocks:
+        ```jsx
+        // React component here
+        ```
+        
+        ```css
+        /* CSS styling here */
+        ```
         """
         
         return self.openui_client.create_component(enhanced_prompt)
     
     def _analyze_component(self, component_code, requirements):
-        """Analyze component using Gemini"""
-        print("🔍 Analyzing component quality...")
-        return self.gemini_client.analyze_component(component_code, requirements)
+        """Analyze component using either PURE framework or standard analysis"""
+        if self.use_pure_framework:
+            print("🎯 Analyzing component using PURE framework...")
+            return self.pure_analyst.analyze_component(component_code, requirements)
+        else:
+            print("🔍 Analyzing component quality...")
+            return self.gemini_client.analyze_component(component_code, requirements)
     
     def _suggest_improvements(self, component_code, analysis):
-        """Get improvement suggestions from Gemini"""
+        """Get improvement suggestions using appropriate analyst"""
         print("💡 Generating improvement suggestions...")
-        return self.gemini_client.suggest_improvements(component_code, analysis)
+        if self.use_pure_framework:
+            return self.pure_analyst.suggest_improvements(component_code, analysis)
+        else:
+            return self.gemini_client.suggest_improvements(component_code, analysis)
     
     def _generate_tests(self, component_code, requirements):
-        """Generate test cases using Gemini"""
+        """Generate test cases using appropriate analyst"""
         print("🧪 Generating test cases...")
-        return self.gemini_client.create_test_cases(component_code, requirements)
+        if self.use_pure_framework:
+            return self.pure_analyst.generate_pure_tests(component_code, requirements)
+        else:
+            return self.gemini_client.create_test_cases(component_code, requirements)
     
     def _refine_component(self, component_code, requirements, improvements, analysis):
         """Refine component based on improvements"""
@@ -180,10 +237,14 @@ class ComponentCreationCrew:
         return self.openui_client.create_component(refinement_prompt)
     
     def _extract_score(self, analysis):
-        """Extract overall score from analysis"""
+        """Extract overall score from analysis (supports both standard and PURE framework)"""
         if not analysis:
             return 0
         
+        if self.use_pure_framework:
+            return self.pure_analyst.extract_pure_score(analysis)
+        
+        # Standard analysis score extraction
         # Look for JSON in the analysis
         json_match = re.search(r'\{[^}]*"overall_score":\s*(\d+)[^}]*\}', analysis)
         if json_match:

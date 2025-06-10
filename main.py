@@ -3,6 +3,9 @@
 Main application for OpenUI + CrewAI + Gemini integration
 """
 
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
+
 from crew_agents import ComponentCreationCrew
 import json
 import time
@@ -26,17 +29,25 @@ def main():
                         help='Maximum number of refinement iterations')
     parser.add_argument('--output', '-o', default="component_result.json",
                         help='Output file for results')
+    parser.add_argument('--pure', action='store_true',
+                        help='Use PURE framework analyst (Purposeful, Usable, Readable, Extensible)')
+    parser.add_argument('--framework', choices=['standard', 'pure'], default='standard',
+                        help='Analysis framework to use (standard or pure)')
     
     args = parser.parse_args()
+    
+    # Determine which framework to use
+    use_pure = args.pure or args.framework == 'pure'
     
     print("🎨 OpenUI + CrewAI + Gemini Component Creator")
     print("=" * 50)
     print(f"Requirements: {args.requirements}")
     print(f"Max iterations: {args.iterations}")
+    print(f"Analysis framework: {'PURE' if use_pure else 'Standard'}")
     print()
     
-    # Initialize the crew
-    crew = ComponentCreationCrew()
+    # Initialize the crew with chosen framework
+    crew = ComponentCreationCrew(use_pure_framework=use_pure)
     
     # Create the component
     start_time = time.time()

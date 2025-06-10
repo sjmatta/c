@@ -21,6 +21,7 @@ help:
 	@echo "  make setup          - Complete setup (install deps + get cookies)"
 	@echo "  make simple         - Quick end-to-end test + preview (1 iteration, ~90s)"
 	@echo "  make demo           - Full end-to-end demo + preview (2 iterations, ~3min)"
+	@echo "  make pure-demo      - Demo with PURE framework analysis"
 	@echo "  make test           - Run all tests"
 	@echo "  make test-apis      - Test OpenUI and Gemini API connections"
 	@echo "  make preview        - Generate HTML preview from existing results"
@@ -35,6 +36,11 @@ help:
 	@echo ""
 	@echo "Custom creation:"
 	@echo "  make create REQUIREMENTS='Your requirements here' ITERATIONS=3"
+	@echo ""
+	@echo "Framework options:"
+	@echo "  --framework=pure    - Use PURE framework (Purposeful, Usable, Readable, Extensible)"
+	@echo "  --framework=standard - Use standard quality analysis (default)"
+	@echo "  make pure-button    - Create button with PURE framework"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  - OpenUI running at localhost:7878"
@@ -107,36 +113,95 @@ demo:
 		which open >/dev/null && open preview.html || echo "   Or run: open preview.html"; \
 	fi
 
+# PURE Framework demo
+pure-demo:
+	@echo "🎯 Running PURE framework demo..."
+	@echo "Framework: PURE (Purposeful, Usable, Readable, Extensible)"
+	@echo "Requirements: $(REQUIREMENTS)"
+	@echo "Iterations: $(ITERATIONS)"
+	@echo ""
+	$(PYTHON) main.py -r '$(REQUIREMENTS)' -i $(ITERATIONS) --pure -o pure_result.json
+	@echo ""
+	@echo "📋 PURE demo completed! Check pure_result.json for results."
+	@if [ -f pure_result.json ]; then \
+		echo "🎨 Generating interactive preview..."; \
+		$(PYTHON) preview_generator.py pure_result.json pure_preview.html; \
+		echo "🌐 Opening PURE framework preview..."; \
+		which open >/dev/null && open pure_preview.html || echo "   Run: open pure_preview.html"; \
+	fi
+
 # Quick component creation with default settings
 create:
 	@echo "🎨 Creating component..."
 	$(PYTHON) main.py -r '$(REQUIREMENTS)' -i $(ITERATIONS) -o $(OUTPUT)
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py $(OUTPUT) create_preview.html
+	@echo "🌐 Opening component preview in browser..."
+	@which open >/dev/null && open create_preview.html || echo "   Run: open create_preview.html"
 
 # Predefined component types
 button:
 	@echo "🔘 Creating button component..."
 	$(PYTHON) main.py -r 'Create a modern button component with multiple variants (primary, secondary, danger), loading states, icons, and smooth hover animations. Make it accessible and responsive.' -i 2 -o button_result.json
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py button_result.json button_preview.html
+	@echo "🌐 Opening button preview in browser..."
+	@which open >/dev/null && open button_preview.html || echo "   Run: open button_preview.html"
 
 card:
 	@echo "🃏 Creating user profile card..."
 	$(PYTHON) main.py -r 'Create a modern user profile card component with avatar, name, title, bio, social links, follow button, and elegant hover effects. Include responsive design and accessibility features.' -i 2 -o card_result.json
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py card_result.json card_preview.html
+	@echo "🌐 Opening card preview in browser..."
+	@which open >/dev/null && open card_preview.html || echo "   Run: open card_preview.html"
 
 toggle:
 	@echo "🔀 Creating toggle switch..."
 	$(PYTHON) main.py -r 'Create a sleek toggle switch component with smooth animations, keyboard support, customizable colors, and proper accessibility. Include both controlled and uncontrolled modes.' -i 2 -o toggle_result.json
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py toggle_result.json toggle_preview.html
+	@echo "🌐 Opening toggle preview in browser..."
+	@which open >/dev/null && open toggle_preview.html || echo "   Run: open toggle_preview.html"
 
 table:
 	@echo "📊 Creating data table..."
 	$(PYTHON) main.py -r 'Create a feature-rich data table component with sorting, filtering, pagination, row selection, and responsive design. Include proper TypeScript types and accessibility.' -i 3 -o table_result.json
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py table_result.json table_preview.html
+	@echo "🌐 Opening table preview in browser..."
+	@which open >/dev/null && open table_preview.html || echo "   Run: open table_preview.html"
+
+# PURE Framework examples
+pure-button:
+	@echo "🎯 Creating button with PURE framework..."
+	@echo "Note: Make sure GEMINI_API_KEY is set in your environment"
+	$(PYTHON) main.py -r 'Create a modern button component with multiple variants, loading states, and accessibility features' --pure -i 2 -o pure_button_result.json
+	$(PYTHON) preview_generator.py pure_button_result.json pure_button_preview.html
+	@which open >/dev/null && open pure_button_preview.html || echo "   Run: open pure_button_preview.html"
+
+pure-card:
+	@echo "🎯 Creating card with PURE framework..."
+	$(PYTHON) main.py -r 'Create a user profile card component with avatar, content, and actions' --pure -i 2 -o pure_card_result.json
+	$(PYTHON) preview_generator.py pure_card_result.json pure_card_preview.html
+	@which open >/dev/null && open pure_card_preview.html || echo "   Run: open pure_card_preview.html"
 
 # Advanced examples
 modal:
 	@echo "🪟 Creating modal component..."
 	$(PYTHON) main.py -r "Create a flexible modal component with backdrop, close button, keyboard escape, focus management, animation, and portal rendering. Support different sizes and accessibility." -i 2 -o modal_result.json
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py modal_result.json modal_preview.html
+	@echo "🌐 Opening modal preview in browser..."
+	@which open >/dev/null && open modal_preview.html || echo "   Run: open modal_preview.html"
 
 form:
 	@echo "📝 Creating form component..."
 	$(PYTHON) main.py -r "Create a comprehensive form component with validation, error handling, different input types, submit states, and accessibility. Include form hooks and TypeScript support." -i 3 -o form_result.json
+	@echo "🎨 Generating interactive preview..."
+	$(PYTHON) preview_generator.py form_result.json form_preview.html
+	@echo "🌐 Opening form preview in browser..."
+	@which open >/dev/null && open form_preview.html || echo "   Run: open form_preview.html"
 
 # Development helpers
 quick-test:
