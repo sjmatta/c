@@ -25,13 +25,13 @@ class OpenUIClient:
             print(f"Cookie file {cookie_file} not found. Run get_openui_cookie.py first.")
             return {}
     
-    def create_component(self, prompt, model="gpt-3.5-turbo"):
+    def create_component(self, prompt, model="gpt-4o"):
         """
         Create a component using OpenUI's chat completions endpoint with automatic continuation
         """
         return self.create_component_with_continuation(prompt, model)
     
-    def create_component_with_continuation(self, prompt, model="gpt-3.5-turbo", max_retries=3):
+    def create_component_with_continuation(self, prompt, model="gpt-4o", max_retries=3):
         """
         Create a component with automatic continuation for truncated responses
         """
@@ -239,7 +239,7 @@ if __name__ == "__main__":
                 "http://localhost:7878/v1/chat/completions",
                 "-H", "Content-Type: application/json",
                 "-H", "Cookie: session=eyJzZXNzaW9uX2lkIjogImM0YTk0NTZmLTBiNWEtNDZmNC05ZWYxLTUwZTc2NDE0ZDhiOCIsICJ1c2VyX2lkIjogIjIwM2ExYTNjLWE2OWYtNDc2Yi05OTdiLWNmZjhiZjcyZTM3NiJ9.aEeF1A.7__3juIeJkrrea_TQQ2gZyhvWFo",
-                "-d", '{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"hello"}],"max_tokens":100,"stream":true}'
+                "-d", '{"model":"gpt-4o","messages":[{"role":"user","content":"hello"}],"stream":true}'
             ], capture_output=True, text=True, timeout=15)
             
             print(f"Curl exit code: {result.returncode}")

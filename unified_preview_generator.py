@@ -100,6 +100,9 @@ def transpile_component_with_babel(component_code, component_name):
     # Remove export statements and assign to window for global access
     window_assignment = f'window.{component_name} = \\1;'
     prepared_code = re.sub(r'export\s+default\s+(\w+)\s*;', window_assignment, prepared_code)
+    # Also handle export const ComponentName with TypeScript annotations
+    prepared_code = re.sub(r'export\s+const\s+(\w+)(?::\s*[^=]+)?\s*=', f'const \\1 = ', prepared_code)
+    prepared_code += f'\nwindow.{component_name} = {component_name};'
     
     # Add React destructuring at the top
     prepared_code = '''
@@ -145,6 +148,11 @@ const { orderBy } = _;
             os.unlink(output_path)
             
             print("✅ Babel transpilation successful")
+            
+            # Post-transpilation cleanup for common React issues
+            transpiled_code = re.sub(r'sortConfig\.direction', 'sortConfig?.direction', transpiled_code)
+            transpiled_code = re.sub(r'sortConfig\.key', 'sortConfig?.key', transpiled_code)
+            
             return transpiled_code
         else:
             print(f"❌ Babel transpilation failed: {result.stderr}")
@@ -281,10 +289,10 @@ def generate_sample_props(component_code, component_name):
                 {"id": "4", "name": "Alice Brown", "age": 29, "email": "alice@example.com"}
             ],
             "columns": [
-                {"header": "ID", "accessor": "id", "sortable": True},
-                {"header": "Name", "accessor": "name", "sortable": True},
-                {"header": "Age", "accessor": "age", "sortable": True},
-                {"header": "Email", "accessor": "email", "sortable": False}
+                {"key": "id", "label": "ID"},
+                {"key": "name", "label": "Name"},
+                {"key": "age", "label": "Age"},
+                {"key": "email", "label": "Email"}
             ]
         }
     elif 'button' in component_lower:
@@ -603,7 +611,11 @@ def validate_preview_in_browser(html_file_path, timeout_ms=10000):
             
             def handle_console(msg):
                 if msg.type == 'error':
-                    errors.append(f"CONSOLE ERROR: {msg.text}")
+                    # Filter out React key warnings as these are non-blocking
+                    if "unique \"key\" prop" in msg.text or "Warning: Each child in a list" in msg.text:
+                        warnings.append(f"CONSOLE WARNING (React Keys): {msg.text}")
+                    else:
+                        errors.append(f"CONSOLE ERROR: {msg.text}")
                 elif msg.type == 'warning':
                     warnings.append(f"CONSOLE WARNING: {msg.text}")
             

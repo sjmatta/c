@@ -6,7 +6,7 @@ UV := uv
 
 # Default values
 REQUIREMENTS := Create a modern button component with loading states and hover effects
-ITERATIONS := 2
+ITERATIONS := 1
 OUTPUT := component_result.json
 
 .PHONY: help setup test test-apis demo clean install deps
@@ -20,7 +20,7 @@ help:
 	@echo ""
 	@echo "  make setup          - Complete setup (install deps + get cookies)"
 	@echo "  make simple         - Quick end-to-end test + preview (1 iteration, ~90s)"
-	@echo "  make demo           - Full end-to-end demo + preview (2 iterations, ~3min)"
+	@echo "  make demo           - Full end-to-end demo + preview (1 iteration, ~90sec)"
 	@echo "  make pure-demo      - Demo with PURE framework analysis"
 	@echo "  make test           - Run all tests"
 	@echo "  make test-apis      - Test OpenUI and Gemini API connections"
@@ -142,7 +142,7 @@ create:
 # Predefined component types
 button:
 	@echo "🔘 Creating button component..."
-	$(PYTHON) main.py -r 'Create a modern button component with multiple variants (primary, secondary, danger), loading states, icons, and smooth hover animations. Make it accessible and responsive.' -i 2 -o button_result.json
+	$(PYTHON) main.py -r 'Create a modern button component with multiple variants (primary, secondary, danger), loading states, icons, and smooth hover animations. Make it accessible and responsive.' -i 1 -o button_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py button_result.json button_preview.html
 	@echo "🌐 Opening button preview in browser..."
@@ -150,7 +150,7 @@ button:
 
 card:
 	@echo "🃏 Creating user profile card..."
-	$(PYTHON) main.py -r 'Create a modern user profile card component with avatar, name, title, bio, social links, follow button, and elegant hover effects. Include responsive design and accessibility features.' -i 2 -o card_result.json
+	$(PYTHON) main.py -r 'Create a modern user profile card component with avatar, name, title, bio, social links, follow button, and elegant hover effects. Include responsive design and accessibility features.' -i 1 -o card_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py card_result.json card_preview.html
 	@echo "🌐 Opening card preview in browser..."
@@ -158,7 +158,7 @@ card:
 
 toggle:
 	@echo "🔀 Creating toggle switch..."
-	$(PYTHON) main.py -r 'Create a sleek toggle switch component with smooth animations, keyboard support, customizable colors, and proper accessibility. Include both controlled and uncontrolled modes.' -i 2 -o toggle_result.json
+	$(PYTHON) main.py -r 'Create a sleek toggle switch component with smooth animations, keyboard support, customizable colors, and proper accessibility. Include both controlled and uncontrolled modes.' -i 1 -o toggle_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py toggle_result.json toggle_preview.html
 	@echo "🌐 Opening toggle preview in browser..."
@@ -176,20 +176,20 @@ table:
 pure-button:
 	@echo "🎯 Creating button with PURE framework..."
 	@echo "Note: Make sure GEMINI_API_KEY is set in your environment"
-	$(PYTHON) main.py -r 'Create a modern button component with multiple variants, loading states, and accessibility features' --pure -i 2 -o pure_button_result.json
+	$(PYTHON) main.py -r 'Create a modern button component with multiple variants, loading states, and accessibility features' --pure -i 1 -o pure_button_result.json
 	$(PYTHON) unified_preview_generator.py pure_button_result.json pure_button_preview.html
 	@which open >/dev/null && open pure_button_preview.html || echo "   Run: open pure_button_preview.html"
 
 pure-card:
 	@echo "🎯 Creating card with PURE framework..."
-	$(PYTHON) main.py -r 'Create a user profile card component with avatar, content, and actions' --pure -i 2 -o pure_card_result.json
+	$(PYTHON) main.py -r 'Create a user profile card component with avatar, content, and actions' --pure -i 1 -o pure_card_result.json
 	$(PYTHON) unified_preview_generator.py pure_card_result.json pure_card_preview.html
 	@which open >/dev/null && open pure_card_preview.html || echo "   Run: open pure_card_preview.html"
 
 # Advanced examples
 modal:
 	@echo "🪟 Creating modal component..."
-	$(PYTHON) main.py -r "Create a flexible modal component with backdrop, close button, keyboard escape, focus management, animation, and portal rendering. Support different sizes and accessibility." -i 2 -o modal_result.json
+	$(PYTHON) main.py -r "Create a flexible modal component with backdrop, close button, keyboard escape, focus management, animation, and portal rendering. Support different sizes and accessibility." -i 1 -o modal_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py modal_result.json modal_preview.html
 	@echo "🌐 Opening modal preview in browser..."
@@ -197,7 +197,7 @@ modal:
 
 form:
 	@echo "📝 Creating form component..."
-	$(PYTHON) main.py -r "Create a comprehensive form component with validation, error handling, different input types, submit states, and accessibility. Include form hooks and TypeScript support." -i 3 -o form_result.json
+	$(PYTHON) main.py -r "Create a comprehensive form component with validation, error handling, different input types, submit states, and accessibility. Include form hooks and TypeScript support." -i 1 -o form_result.json
 	@echo "🎨 Generating interactive preview..."
 	$(PYTHON) unified_preview_generator.py form_result.json form_preview.html
 	@echo "🌐 Opening form preview in browser..."

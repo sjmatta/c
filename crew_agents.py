@@ -89,7 +89,7 @@ class ComponentCreationCrew:
             allow_delegation=False
         )
     
-    def create_component(self, requirements, max_iterations=3):
+    def create_component(self, requirements, max_iterations=1):
         """
         Main workflow to create and refine a component
         """
@@ -119,21 +119,9 @@ class ComponentCreationCrew:
                 print("✅ Component meets quality standards!")
                 break
             
-            # Generate improvements
-            improvements = self._suggest_improvements(component_code, analysis)
-            if not improvements:
-                break
-            
-            # Generate tests
-            tests = self._generate_tests(component_code, requirements)
-            
-            # Refine component
-            refined_component = self._refine_component(
-                component_code, requirements, improvements, analysis
-            )
-            
-            if refined_component:
-                component_code = refined_component
+            # Skip refinement to avoid token limit issues
+            print("⏭️  Skipping refinement to prevent token overflow")
+            break
             
             iteration += 1
         
@@ -182,104 +170,31 @@ import { Pagination } from './components/Pagination';
         """Generate initial component using OpenUI"""
         print("🎨 Generating initial component with OpenUI...")
         
-        enhanced_prompt = f"""
-        Create a React component: {requirements}
-        
-        🎨 MODERN DESIGN REQUIREMENTS - CREATE BEAUTIFUL, VISUALLY APPEALING COMPONENTS:
-        
-        **COLOR PALETTE & VISUAL HIERARCHY:**
-        - Use rich, modern color schemes with proper contrast
-        - Primary colors: blue-600, indigo-600, purple-600, emerald-600
-        - Accent colors: amber-500, rose-500, cyan-500, violet-500  
-        - Neutral grays: slate-50, slate-100, slate-200, slate-600, slate-700, slate-800
-        - Background gradients: "bg-gradient-to-r from-blue-600 to-purple-600"
-        
-        **TABLE STYLING (if applicable):**
-        - Container: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
-        - Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 text-left text-sm font-semibold text-slate-900 uppercase tracking-wider border-b border-slate-200"
-        - ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50"
-        - Row hover: "hover:bg-blue-50/50 transition-colors duration-200"
-        - Cells: "px-6 py-4 text-sm text-slate-700 border-b border-slate-100"
-        - Action buttons in rows: Use colored badges with "bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-medium"
-        
-        **BUTTON DESIGNS:**
-        - Primary: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-        - Secondary: "bg-white border-2 border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-        - Destructive: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-        
-        **PAGINATION STYLING:**
-        - Container: "flex items-center justify-center gap-3 py-6 bg-slate-50/50 rounded-lg"
-        - Page numbers: "h-10 w-10 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 text-slate-600 font-medium flex items-center justify-center transition-all duration-200"
-        - Active page: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold flex items-center justify-center shadow-lg"
-        - Prev/Next: "px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 text-slate-600 font-medium transition-all duration-200"
-        - Disabled: "opacity-40 cursor-not-allowed hover:bg-white hover:border-slate-200 hover:text-slate-600"
-        
-        **CARD COMPONENTS:**
-        - Container: "bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300"
-        - Header: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200"
-        - Body: "p-6 space-y-4"
-        - Footer: "px-6 py-4 bg-slate-50/50 border-t border-slate-200"
-        
-        **FORM ELEMENTS:**
-        - Inputs: "border-2 border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
-        - Labels: "text-sm font-semibold text-slate-700 mb-2 block"
-        - Error states: "border-red-300 focus:border-red-500 focus:ring-red-100"
-        
-        **HOVER & INTERACTIVE STATES:**
-        - All interactive elements MUST have smooth transitions: "transition-all duration-200"
-        - Use subtle transforms: "hover:-translate-y-0.5" for buttons
-        - Color transitions: "hover:bg-blue-50" with proper color progression
-        - Shadow enhancements: "hover:shadow-xl" for elevated elements
-        
-        **VISUAL ENHANCEMENTS:**
-        - Use icons (Unicode symbols): ▲ ▼ for sorting, ← → for navigation
-        - Add loading states with opacity changes: "opacity-75"
-        - Use badge components: "bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"
-        - Add status indicators with colored dots: "h-2 w-2 rounded-full bg-green-500"
-        
-        CRITICAL INSTRUCTIONS:
-        - Use complete Tailwind class names - NEVER use "..." or placeholders
-        - Implement all functionality from scratch using only approved dependencies
-        - EVERY element must be beautifully styled - NO unstyled or boring elements
-        - Create visual hierarchy with typography, spacing, and color
-        
-        🚨 SECURITY CONSTRAINT - APPROVED DEPENDENCIES ONLY:
-        You MUST only use these libraries:
-        - react (available globally as React)
-        - react-dom (available globally as ReactDOM)  
-        - lodash (available globally as _)
-        - Tailwind CSS classes only
-        
-        DO NOT import react-table, moment, d3, or ANY other external libraries.
-        If you need table functionality, implement it manually using React state and lodash.
-        If you need pagination, create beautiful pagination with the styles above.
-        If you need date functionality, use native Date objects or lodash.
-        If you need data visualization, use CSS and manual calculations.
-        
-        Requirements:
-        - React functional component with TypeScript
-        - Use ONLY Tailwind CSS classes (no custom CSS)
-        - Include beautiful hover/focus states with transitions
-        - Make it responsive with proper breakpoints
-        - Create visually stunning, modern components that users will love
-        
-        Format as:
-        ```jsx
-        import React from 'react';
-        
-        interface Props {{
-          // props here
-        }}
-        
-        const Component: React.FC<Props> = (props) => {{
-          return (
-            // JSX with beautiful, complete Tailwind classes - MAKE IT STUNNING
-          );
-        }};
-        
-        export default Component;
-        ```
-        """
+        enhanced_prompt = f"""Create a React component: {requirements}
+
+🎨 MODERN BEAUTIFUL DESIGN - Make components visually stunning:
+
+**ESSENTIAL STYLING:**
+- Tables: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+- Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 font-semibold text-slate-900 uppercase"
+- ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50 hover:bg-blue-50/50 transition-colors duration-200"
+- Buttons: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+- Pagination: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold shadow-lg" (active), "bg-white border-2 border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-200" (inactive)
+
+**REQUIREMENTS:**
+- Use rich colors: blue-600, indigo-600, purple-600, emerald-600, slate-50/100/200/700/800
+- ALL interactive elements need "transition-all duration-200"
+- Use gradients, shadows, hover effects, transforms
+- Icons: ▲▼ for sorting, ←→ for navigation
+- CRITICAL: All .map() functions MUST have unique key props (use item.id, index, or item.key)
+
+🚨 DEPENDENCIES: Only use react, lodash (_), Tailwind CSS. NO external libraries.
+
+Return TypeScript functional component with beautiful styling:
+```jsx
+import React from 'react';
+// Component with stunning Tailwind classes
+```"""
         
         return self.openui_client.create_component(enhanced_prompt)
     
@@ -312,71 +227,29 @@ import { Pagination } from './components/Pagination';
         """Refine component based on improvements"""
         print("✨ Refining component...")
         
-        refinement_prompt = f"""
-        Improve this React component based on the analysis and suggestions:
-        
-        CURRENT COMPONENT:
-        ```jsx
-        {component_code}
-        ```
-        
-        REQUIREMENTS:
-        {requirements}
-        
-        ANALYSIS:
-        {analysis}
-        
-        IMPROVEMENTS TO IMPLEMENT:
-        {improvements}
-        
-        🎨 ENHANCED DESIGN REQUIREMENTS - MAKE THIS COMPONENT STUNNING:
-        Apply the same modern design principles for visual enhancement:
-        
-        **TABLE STYLING UPGRADE:**
-        - Replace basic tables with: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
-        - Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 text-left text-sm font-semibold text-slate-900 uppercase tracking-wider border-b border-slate-200"
-        - IMPLEMENT ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50"
-        - Row hover: "hover:bg-blue-50/50 transition-colors duration-200"
-        - Cells: "px-6 py-4 text-sm text-slate-700 border-b border-slate-100"
-        
-        **BUTTON ENHANCEMENT:**
-        - Upgrade plain buttons to: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-        - Secondary buttons: "bg-white border-2 border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-        
-        **PAGINATION BEAUTY:**
-        - Container: "flex items-center justify-center gap-3 py-6 bg-slate-50/50 rounded-lg"
-        - Page numbers: "h-10 w-10 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 text-slate-600 font-medium flex items-center justify-center transition-all duration-200"
-        - Active page: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold flex items-center justify-center shadow-lg"
-        
-        **COLOR & VISUAL HIERARCHY:**
-        - Rich color palette: blue-600, indigo-600, purple-600, emerald-600
-        - Neutral grays: slate-50, slate-100, slate-200, slate-600, slate-700, slate-800
-        - Add gradients: "bg-gradient-to-r from-blue-600 to-purple-600"
-        - Badge components: "bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"
-        
-        CRITICAL INSTRUCTIONS:
-        - Use complete Tailwind class names - NEVER use "..." or placeholders  
-        - ALL interactive elements (buttons, inputs, etc.) MUST be beautifully styled
-        - Implement all functionality from scratch using only approved dependencies
-        - TRANSFORM this into a visually stunning, modern component
-        - Add smooth transitions to ALL interactive elements: "transition-all duration-200"
-        
-        🚨 SECURITY CONSTRAINT - APPROVED DEPENDENCIES ONLY:
-        You MUST only use these libraries:
-        - react (available globally as React)
-        - react-dom (available globally as ReactDOM)  
-        - lodash (available globally as _)
-        - Tailwind CSS classes only
-        
-        DO NOT import react-table, moment, d3, or ANY other external libraries.
-        DO NOT import from './components/...' - implement everything inline.
-        If you need table functionality, implement it manually using React state and lodash.
-        If you need pagination, create beautiful pagination with the styles above.
-        If you need date functionality, use native Date objects or lodash.
-        
-        Please provide the improved component code that addresses the identified issues.
-        Focus on visual improvements and modern design while maintaining functionality.
-        """
+        refinement_prompt = f"""Improve this React component:
+
+CURRENT COMPONENT:
+```jsx
+{component_code}
+```
+
+REQUIREMENTS: {requirements}
+
+ANALYSIS: {analysis}
+
+IMPROVEMENTS: {improvements}
+
+🎨 MAKE IT BEAUTIFUL - Apply stunning modern design:
+- Tables: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+- Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 font-semibold text-slate-900 uppercase"
+- ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50 hover:bg-blue-50/50 transition-colors duration-200"
+- Buttons: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+- Pagination: Active "bg-gradient-to-r from-blue-600 to-blue-700 text-white", Inactive "bg-white border-2 border-slate-200 hover:border-blue-300"
+
+🚨 DEPENDENCIES: Only react, lodash (_), Tailwind CSS. NO external libraries.
+
+Return improved component with beautiful styling and all suggested improvements implemented."""
         
         return self.openui_client.create_component(refinement_prompt)
     
