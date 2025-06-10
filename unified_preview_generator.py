@@ -98,6 +98,31 @@ def transpile_component_with_babel(component_code, component_name):
     prepared_code = re.sub(r'^import\s+.*?from\s+[\'"]react[\'"]\s*;?\s*$', '', prepared_code, flags=re.MULTILINE)
     prepared_code = re.sub(r'^import\s+.*?from\s+[\'"]@heroicons/react.*?[\'"]\s*;?\s*$', '', prepared_code, flags=re.MULTILINE)
     prepared_code = re.sub(r'^import\s+.*?from\s+[\'"]framer-motion[\'"]\s*;?\s*$', '', prepared_code, flags=re.MULTILINE)
+    
+    # Remove axios import and replace data fetching with static mock data
+    prepared_code = re.sub(r'^import\s+.*?from\s+[\'"]axios[\'"]\s*;?\s*$', '', prepared_code, flags=re.MULTILINE)
+    
+    # Replace useEffect data fetching with static data initialization
+    # Look for useEffect that contains axios or fetch calls and replace with static data
+    useEffect_pattern = r'useEffect\(\s*\(\)\s*=>\s*\{[^}]*(?:axios|fetch)[^}]*\}[^}]*\}\s*,\s*\[[^\]]*\]\s*\)\s*;'
+    if re.search(useEffect_pattern, prepared_code, re.DOTALL):
+        # Replace the entire useEffect with static data initialization
+        sample_data = '''
+  useEffect(() => {
+    // Static mock data for preview
+    const mockData = [
+      { id: 1, name: "Alice Johnson", age: 28, actions: "Like" },
+      { id: 2, name: "Bob Wilson", age: 34, actions: "Like" },
+      { id: 3, name: "Charlie Brown", age: 42, actions: "Like" },
+      { id: 4, name: "Diana Prince", age: 29, actions: "Like" },
+      { id: 5, name: "Eva Martinez", age: 31, actions: "Like" }
+    ];
+    setData(mockData);
+    setLoading(false);
+  }, []);'''
+        
+        prepared_code = re.sub(useEffect_pattern, sample_data, prepared_code, flags=re.DOTALL)
+    
     # Remove other imports
     prepared_code = re.sub(r'^import\s+.*?;?\s*(?://.*)?$', '', prepared_code, flags=re.MULTILINE)
     
