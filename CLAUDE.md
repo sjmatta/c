@@ -132,12 +132,44 @@ PURE framework uses simple regex extraction for robust parsing:
 match = re.search(r'PURE_SCORE:\s*([0-9.]+)', analysis)
 ```
 
-### Preview Generation (`preview_generator.py`, `react_preview_generator.py`)
-Two preview systems are available:
-- **Static HTML Preview**: Converts simple components to vanilla JavaScript (limited, prone to errors)
-- **React Preview**: Uses Babel in-browser transpilation for full TypeScript/React component rendering (recommended)
+### Preview Generation (`unified_preview_generator.py`)
+The system uses **Babel-transpiled React previews** with intelligent prop generation:
+- **Babel Transpilation**: Converts TypeScript/JSX to browser-compatible JavaScript
+- **Intelligent Prop Generation**: Automatically analyzes ANY React component to generate appropriate sample props
+- **Browser Validation**: Uses Playwright to validate component rendering and catch errors
 
-**CRITICAL**: Use `react_preview_generator.py` for complex components with TypeScript, state, or advanced React features.
+**CRITICAL**: The system supports ANY React component automatically - no manual updates needed for new component types.
+
+### Intelligent Prop Generation (`intelligent_prop_generator.py`)
+**Revolutionary multi-layered approach** that eliminates the need for hard-coded component type handling:
+
+#### Analysis Layers (in order of preference):
+1. **TypeScript Interface Analysis**: Parses `interface ComponentProps` definitions to extract prop types and generate contextual sample data
+2. **Component Signature Analysis**: Analyzes prop destructuring patterns in component function signatures  
+3. **Usage Pattern Analysis**: Detects how props are used (`.map()`, `.includes()`, property access) to infer data types
+4. **AI-Powered Analysis**: Uses Gemini to analyze component structure and generate appropriate props
+5. **Basic Inference**: Fallback pattern matching for common prop patterns
+
+#### Key Features:
+- **Universal Support**: Works with Timeline, Modal, Form, ProductCard, Carousel - ANY React component
+- **Contextual Data**: Generates realistic sample data based on prop names and component context
+- **Type-Aware**: Handles arrays, objects, strings, numbers, booleans, and union types
+- **Extensible**: No manual updates required for new component types
+- **Robust**: Multiple fallback layers ensure preview generation never fails
+
+#### Before vs After:
+```python
+# OLD: Hard-coded, brittle
+if 'table' in component_lower:
+    props = {"data": [...]}  # Only worked for 4 component types!
+else:
+    return {}  # Empty props = crash!
+
+# NEW: Intelligent, universal  
+generator = IntelligentPropGenerator()
+props = generator.generate_props(component_code, component_name)
+# Works for ANY component automatically!
+```
 
 ## Output Structure
 
@@ -188,6 +220,26 @@ New predefined components should be added to `Makefile` with:
 - Optimized requirements prompt
 - Appropriate iteration count
 - Output file naming convention
+
+### Intelligent Prop Generation Development
+**NO MANUAL UPDATES NEEDED** for new component types! The system automatically supports ANY React component.
+
+#### When to Modify IntelligentPropGenerator:
+- **Never for new component types** - the system handles them automatically
+- **Only for new prop analysis techniques** - e.g., adding support for new TypeScript syntax
+- **Only for new data generation patterns** - e.g., adding specialized sample data generators
+
+#### Adding New Analysis Layers:
+1. Add new method to `IntelligentPropGenerator` class
+2. Insert in the analysis chain in `generate_props()` method
+3. Ensure proper fallback to next layer on failure
+4. Test with diverse component types
+
+#### Common Sample Data Patterns:
+- **Arrays**: Always include 3-4 realistic items with `id`, `name`, and contextual properties
+- **Objects**: Include commonly accessed properties based on usage analysis  
+- **Strings**: Generate contextual content based on prop names (`title`, `description`, `email`, etc.)
+- **Images**: Use `placehold.co` with appropriate dimensions and context-aware text
 
 ### Preview Generator Critical Requirements
 **ALWAYS test preview generation after making changes to prevent JavaScript errors:**
