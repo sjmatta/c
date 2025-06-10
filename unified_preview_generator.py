@@ -308,11 +308,42 @@ def generate_sample_props(component_code, component_name):
     return props
 
 
+def format_analysis_for_html(analysis):
+    """Convert markdown-like formatting to HTML for better display"""
+    if not analysis:
+        return "No analysis available"
+    
+    # Escape HTML characters first
+    html = analysis.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    
+    # Convert markdown-style formatting to HTML
+    # Headers
+    html = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
+    html = re.sub(r'^\*\*(.*?):\*\*', r'<strong>\1:</strong>', html, flags=re.MULTILINE)
+    
+    # Bold text
+    html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
+    
+    # Code blocks
+    html = re.sub(r'```json\n(.*?)\n```', r'<pre class="code-block">\1</pre>', html, flags=re.DOTALL)
+    html = re.sub(r'```(.*?)\n(.*?)\n```', r'<pre class="code-block">\2</pre>', html, flags=re.DOTALL)
+    
+    # Inline code
+    html = re.sub(r'`([^`]+)`', r'<code>\1</code>', html)
+    
+    # Lists
+    html = re.sub(r'^\* (.*?)$', r'• \1', html, flags=re.MULTILINE)
+    html = re.sub(r'^\- (.*?)$', r'• \1', html, flags=re.MULTILINE)
+    
+    return html
+
+
 def create_babel_preview_html(transpiled_code, component_name, sample_props, score, iterations, analysis):
     """Create the HTML preview with transpiled JavaScript (no Babel needed in browser)"""
     
     props_json = json.dumps(sample_props, indent=2)
-    analysis_preview = analysis[:500] + "..." if len(analysis) > 500 else analysis
+    # Format analysis for better display (convert markdown-like formatting to HTML)
+    analysis_preview = format_analysis_for_html(analysis)
     
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -399,6 +430,59 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
             margin: 20px 0;
             font-family: monospace;
         }}
+        
+        .analysis-content {{
+            line-height: 1.6;
+            color: #444;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e1e1e1;
+        }}
+        
+        .analysis-content h1,
+        .analysis-content h2,
+        .analysis-content h3 {{
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }}
+        
+        .analysis-content strong {{
+            color: #333;
+            font-weight: 600;
+        }}
+        
+        .analysis-content code {{
+            background: #e8e8e8;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+        }}
+        
+        .analysis-content .code-block {{
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            white-space: pre;
+        }}
+        
+        .analysis-content h2 {{
+            border-bottom: 2px solid #e1e1e1;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }}
     </style>
 </head>
 <body>
@@ -427,7 +511,7 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
     
     <div class="preview-section">
         <h2>📊 Component Analysis</h2>
-        <pre style="line-height: 1.6; color: #666; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">{analysis_preview}</pre>
+        <div class="analysis-content">{analysis_preview}</div>
     </div>
     
     <!-- Error display for debugging -->
