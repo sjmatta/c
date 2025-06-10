@@ -1,6 +1,26 @@
 # Component Library Reference
 
-This document defines the reusable components available for AI generation. When creating components, prefer using these existing components over generating everything from scratch.
+This document defines the reusable components and **APPROVED DEPENDENCIES** available for AI generation. 
+
+## 🚨 CRITICAL: Approved Dependencies Only
+
+You MUST only use these pre-approved libraries. DO NOT import any other libraries:
+
+### Available NPM Packages:
+- `react` - React library (included globally)
+- `react-dom` - React DOM (included globally)  
+- `lodash` - Utility library (available as global `_`)
+
+### CSS Framework:
+- **Tailwind CSS** - Use ONLY Tailwind classes (included via CDN)
+
+### NOT ALLOWED:
+- ❌ `react-table` - Use manual table logic with Tailwind styling
+- ❌ `moment` - Use native Date or lodash for date operations
+- ❌ `d3` - Use CSS transforms and manual calculations
+- ❌ Any other external libraries
+
+If you need functionality from a non-approved library, implement it manually using the approved dependencies above.
 
 ## Available Components
 

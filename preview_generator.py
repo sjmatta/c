@@ -71,250 +71,153 @@ def extract_pure_dimensions(analysis_text):
 
 def jsx_to_vanilla_js(jsx_code):
     """Convert JSX to vanilla JavaScript for browser preview"""
-    # Simple JSX to vanilla JS conversion for preview
-    # This is a basic conversion - for complex components, use a proper transpiler
-    
-    # Extract component name
-    component_name_match = re.search(r'const\s+(\w+)\s*=', jsx_code)
+    # Extract component name - look for React component pattern
+    component_name_match = re.search(r'const\s+(\w+)\s*:\s*React\.FC', jsx_code)
+    if not component_name_match:
+        component_name_match = re.search(r'const\s+(\w+)\s*=.*?=>', jsx_code)
     if not component_name_match:
         component_name_match = re.search(r'function\s+(\w+)\s*\(', jsx_code)
     
     component_name = component_name_match.group(1) if component_name_match else 'Component'
     
-    # Determine component type based on name and JSX content
-    jsx_lower = jsx_code.lower()
+    # Extract the JSX return statement to get the actual component structure
+    jsx_pattern = r'return\s*\(\s*(.*?)\s*\);'
+    jsx_match = re.search(jsx_pattern, jsx_code, re.DOTALL)
     
-    if 'table' in component_name.lower() or '<table' in jsx_lower:
-        # Table component
-        vanilla_js = f"""
-function {component_name}(props) {{
-    const container = document.createElement('div');
-    container.style.cssText = 'width: 100%; overflow-x: auto; margin: 20px 0;';
-    
-    const table = document.createElement('table');
-    table.style.cssText = 'width: 100%; border-collapse: collapse; border: 1px solid #ddd;';
-    
-    // Sample data for demo
-    const sampleData = [
-        {{ id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' }},
-        {{ id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' }},
-        {{ id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor' }}
-    ];
-    
-    // Create header
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    ['ID', 'Name', 'Email', 'Role', 'Actions'].forEach(text => {{
-        const th = document.createElement('th');
-        th.textContent = text;
-        th.style.cssText = 'padding: 12px; background: #f8f9fa; border: 1px solid #ddd; text-align: left; font-weight: bold;';
-        headerRow.appendChild(th);
-    }});
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-    
-    // Create body
-    const tbody = document.createElement('tbody');
-    sampleData.forEach(row => {{
-        const tr = document.createElement('tr');
-        tr.style.cssText = 'transition: background-color 0.2s;';
-        tr.addEventListener('mouseenter', () => tr.style.backgroundColor = '#f8f9fa');
-        tr.addEventListener('mouseleave', () => tr.style.backgroundColor = '');
+    if jsx_match:
+        jsx_content = jsx_match.group(1).strip()
         
-        [row.id, row.name, row.email, row.role].forEach(text => {{
-            const td = document.createElement('td');
-            td.textContent = text;
-            td.style.cssText = 'padding: 12px; border: 1px solid #ddd;';
-            tr.appendChild(td);
+        # Check if this is a complex component with .map() or other React logic
+        if '.map(' in jsx_content or '{' in jsx_content and '}' in jsx_content:
+            # For complex components, create a simple static demo based on component type
+            component_lower = component_name.lower()
+            
+            if 'table' in component_lower or 'data' in component_lower:
+                demo_content = """
+                <div class="overflow-x-auto shadow-lg rounded-lg">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">John Doe</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">32</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Software Engineer</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Jane Smith</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">28</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Designer</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Bob Wilson</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">35</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Product Manager</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                """
+            else:
+                # Fallback for other complex components
+                demo_content = f"""
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">{component_name} Component</h3>
+                    <p class="text-gray-500">This component uses complex React logic that cannot be previewed as static HTML.</p>
+                    <p class="text-gray-500 text-sm mt-2">See the JSX code tab for the full implementation.</p>
+                </div>
+                """
+        else:
+            # Simple component - try to convert JSX to HTML
+            html_content = jsx_content
+            
+            # Step 1: Convert JSX attributes to HTML attributes
+            html_content = re.sub(r'className=', 'class=', html_content)
+            
+            # Step 2: Handle React expressions in attributes and content carefully
+            html_content = re.sub(r'alt=\{name\}', 'alt="John Doe"', html_content)
+            html_content = re.sub(r'src=\{avatar\}', 'src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop&crop=face"', html_content)
+            
+            # Replace {variable} in text content
+            html_content = re.sub(r'>\{name\}<', '>John Doe<', html_content)
+            html_content = re.sub(r'>\{occupation\}<', '>Software Engineer<', html_content)
+            
+            # Step 3: Remove React event handlers 
+            html_content = re.sub(r'onClick=\{[^}]*\}', '', html_content)
+            
+            # Step 4: Remove React comments {/* */}
+            html_content = re.sub(r'\{/\*.*?\*/\}', '', html_content, flags=re.DOTALL)
+            
+            # Step 5: Handle special cases like "..." in class names
+            html_content = re.sub(r'class="[^"]*\.\.\.[^"]*"', 'class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"', html_content)
+            
+            # Step 6: Fix any remaining unquoted attributes
+            html_content = re.sub(r'(\w+)=([^"\s>]+)(?=\s|>)', r'\1="\2"', html_content)
+            
+            demo_content = html_content
+        
+        vanilla_js = f"""
+// Render the generated component demo
+function renderComponent() {{
+    const container = document.getElementById('component-container');
+    container.innerHTML = `
+        <div class="flex justify-center items-center p-8">
+            {demo_content}
+        </div>
+    `;
+    
+    // Add basic interactivity to buttons
+    const buttons = container.querySelectorAll('button');
+    buttons.forEach((btn, index) => {{
+        btn.addEventListener('click', () => {{
+            alert(`${{btn.textContent}} clicked!`);
         }});
-        
-        // Actions column
-        const actionTd = document.createElement('td');
-        actionTd.style.cssText = 'padding: 12px; border: 1px solid #ddd;';
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Edit';
-        editBtn.style.cssText = 'margin-right: 5px; padding: 4px 8px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;';
-        editBtn.onclick = () => alert(`Edit ${{row.name}}`);
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.style.cssText = 'padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;';
-        deleteBtn.onclick = () => alert(`Delete ${{row.name}}`);
-        actionTd.appendChild(editBtn);
-        actionTd.appendChild(deleteBtn);
-        tr.appendChild(actionTd);
-        
-        tbody.appendChild(tr);
-    }});
-    table.appendChild(tbody);
-    container.appendChild(table);
-    
-    return container;
-}}
-
-// Create and mount the component
-function renderComponent() {{
-    const container = document.getElementById('component-container');
-    container.innerHTML = '';
-    
-    const component = {component_name}({{ data: [] }});
-    container.appendChild(component);
-}}
-"""
-    elif 'card' in component_name.lower() or 'profile' in jsx_lower:
-        # Card component
-        vanilla_js = f"""
-function {component_name}(props) {{
-    const card = document.createElement('div');
-    card.style.cssText = 'max-width: 300px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: white;';
-    
-    const avatar = document.createElement('div');
-    avatar.style.cssText = 'width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, #007bff, #0056b3); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;';
-    avatar.textContent = 'JD';
-    
-    const name = document.createElement('h3');
-    name.textContent = props.name || 'John Doe';
-    name.style.cssText = 'margin: 0 0 8px; text-align: center; color: #333;';
-    
-    const title = document.createElement('p');
-    title.textContent = props.title || 'Software Engineer';
-    title.style.cssText = 'margin: 0 0 16px; text-align: center; color: #666; font-size: 14px;';
-    
-    const bio = document.createElement('p');
-    bio.textContent = props.bio || 'Passionate developer with expertise in React and modern web technologies.';
-    bio.style.cssText = 'margin: 0 0 20px; text-align: center; color: #555; font-size: 13px; line-height: 1.4;';
-    
-    const followBtn = document.createElement('button');
-    followBtn.textContent = 'Follow';
-    followBtn.style.cssText = 'width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background 0.2s;';
-    followBtn.onmouseover = () => followBtn.style.background = '#0056b3';
-    followBtn.onmouseout = () => followBtn.style.background = '#007bff';
-    followBtn.onclick = () => alert('Following user!');
-    
-    card.appendChild(avatar);
-    card.appendChild(name);
-    card.appendChild(title);
-    card.appendChild(bio);
-    card.appendChild(followBtn);
-    
-    return card;
-}}
-
-// Create and mount the component
-function renderComponent() {{
-    const container = document.getElementById('component-container');
-    container.innerHTML = '';
-    
-    const component = {component_name}({{ name: 'John Doe', title: 'Software Engineer' }});
-    container.appendChild(component);
-}}
-"""
-    elif 'toggle' in component_name.lower() or 'switch' in jsx_lower:
-        # Toggle component
-        vanilla_js = f"""
-function {component_name}(props) {{
-    const container = document.createElement('div');
-    container.style.cssText = 'display: flex; align-items: center; gap: 10px; margin: 20px;';
-    
-    const label = document.createElement('label');
-    label.textContent = props.label || 'Toggle Switch';
-    label.style.cssText = 'font-size: 14px; color: #333;';
-    
-    const toggleWrapper = document.createElement('div');
-    toggleWrapper.style.cssText = 'position: relative; width: 50px; height: 24px; background: #ccc; border-radius: 12px; cursor: pointer; transition: background 0.3s;';
-    
-    const toggleKnob = document.createElement('div');
-    toggleKnob.style.cssText = 'position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);';
-    
-    let isOn = props.checked || false;
-    
-    function updateToggle() {{
-        if (isOn) {{
-            toggleWrapper.style.background = '#007bff';
-            toggleKnob.style.transform = 'translateX(26px)';
-        }} else {{
-            toggleWrapper.style.background = '#ccc';
-            toggleKnob.style.transform = 'translateX(0)';
-        }}
-    }}
-    
-    toggleWrapper.onclick = () => {{
-        isOn = !isOn;
-        updateToggle();
-        if (props.onChange) props.onChange(isOn);
-    }};
-    
-    updateToggle();
-    
-    toggleWrapper.appendChild(toggleKnob);
-    container.appendChild(label);
-    container.appendChild(toggleWrapper);
-    
-    return container;
-}}
-
-// Create and mount the component
-function renderComponent() {{
-    const container = document.getElementById('component-container');
-    container.innerHTML = '';
-    
-    const component1 = {component_name}({{ label: 'Enable notifications', checked: false }});
-    const component2 = {component_name}({{ label: 'Dark mode', checked: true }});
-    
-    container.appendChild(component1);
-    container.appendChild(component2);
-}}
-"""
-    else:
-        # Default to button component
-        vanilla_js = f"""
-function {component_name}(props) {{
-    const element = document.createElement('button');
-    element.textContent = props.children || props.label || 'Click me!';
-    element.className = 'button ' + (props.variant || 'primary');
-    
-    if (props.loading) {{
-        element.textContent = 'Loading...';
-        element.disabled = true;
-    }}
-    
-    if (props.onClick) {{
-        element.addEventListener('click', props.onClick);
-    }}
-    
-    return element;
-}}
-
-// Create and mount the component
-function renderComponent() {{
-    const container = document.getElementById('component-container');
-    container.innerHTML = '';
-    
-    // Example usage
-    const component1 = {component_name}({{
-        children: 'Primary Button',
-        variant: 'primary',
-        onClick: () => alert('Primary clicked!')
     }});
     
-    const component2 = {component_name}({{
-        children: 'Secondary Button', 
-        variant: 'secondary',
-        onClick: () => alert('Secondary clicked!')
+    // Add click handlers to links
+    const links = container.querySelectorAll('a[href="#"]');
+    links.forEach(link => {{
+        link.addEventListener('click', (e) => {{
+            e.preventDefault();
+            alert('Link clicked!');
+        }});
     }});
-    
-    const component3 = {component_name}({{
-        children: 'Loading Button',
-        loading: true
-    }});
-    
-    container.appendChild(component1);
-    container.appendChild(document.createTextNode(' '));
-    container.appendChild(component2);
-    container.appendChild(document.createTextNode(' '));
-    container.appendChild(component3);
 }}
 """
-    return vanilla_js
+        return vanilla_js
+    
+    # Fallback: simple component display
+    return f"""
+function renderComponent() {{
+    const container = document.getElementById('component-container');
+    container.innerHTML = `
+        <div class="flex justify-center items-center p-8">
+            <div class="text-center">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">{component_name} Component</h3>
+                <p class="text-gray-500">Generated with Tailwind CSS</p>
+            </div>
+        </div>
+    `;
+}}
+"""
 
 
 def create_html_preview(component_code, css_code="", component_name="Component", score=None, iterations=None, analysis_framework=None, analysis_text=None):
@@ -382,6 +285,10 @@ def create_html_preview(component_code, css_code="", component_name="Component",
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{component_name} Preview</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Heroicons for icons -->
+    <script src="https://unpkg.com/@heroicons/react@2.0.18/24/outline/index.js" type="module"></script>
     <style>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

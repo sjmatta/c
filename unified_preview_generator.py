@@ -205,6 +205,66 @@ def clean_component_basic(code):
     return code.strip()
 
 
+def include_component_library():
+    """Include our custom component library in the preview"""
+    
+    # Transpiled Pagination component (simplified for preview)
+    pagination_component = """
+// Custom Pagination Component (transpiled)
+const Pagination = ({ currentPage, totalPages, onPageChange, className = "" }) => {
+  const cn = (...classes) => classes.filter(Boolean).join(' ');
+  
+  const baseButtonClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2";
+  const regularButtonClasses = baseButtonClasses + " h-10 px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100";
+  const numberButtonClasses = baseButtonClasses + " h-10 w-10 border border-gray-300 bg-white hover:bg-gray-100";
+  const activeButtonClasses = "bg-blue-600 text-white hover:bg-blue-600/90";
+  const disabledButtonClasses = "opacity-50 cursor-not-allowed";
+
+  return React.createElement("div", 
+    { className: cn("flex items-center justify-center gap-2 py-4", className) },
+    
+    // Previous Button
+    React.createElement("button", {
+      className: cn(regularButtonClasses, currentPage === 1 && disabledButtonClasses),
+      disabled: currentPage === 1,
+      onClick: () => onPageChange(currentPage - 1),
+      "aria-label": "Go to previous page"
+    }, "Previous"),
+    
+    // Page Numbers
+    ...Array.from({ length: totalPages }, (_, index) => {
+      const pageNumber = index + 1;
+      const isActive = currentPage === pageNumber;
+      
+      return React.createElement("button", {
+        key: pageNumber,
+        className: cn(
+          numberButtonClasses,
+          isActive && activeButtonClasses,
+          !isActive && "hover:bg-gray-100"
+        ),
+        onClick: () => onPageChange(pageNumber),
+        "aria-current": isActive ? "page" : undefined,
+        "aria-label": `Go to page ${pageNumber}`
+      }, pageNumber);
+    }),
+    
+    // Next Button
+    React.createElement("button", {
+      className: cn(regularButtonClasses, currentPage === totalPages && disabledButtonClasses),
+      disabled: currentPage === totalPages,
+      onClick: () => onPageChange(currentPage + 1),
+      "aria-label": "Go to next page"
+    }, "Next")
+  );
+};
+
+// Make Pagination available globally
+window.Pagination = Pagination;
+"""
+    
+    return pagination_component
+
 def generate_sample_props(component_code, component_name):
     """Generate appropriate sample props based on component analysis"""
     
@@ -218,6 +278,12 @@ def generate_sample_props(component_code, component_name):
                 {"id": "2", "name": "Jane Smith", "age": 28, "email": "jane@example.com"},
                 {"id": "3", "name": "Bob Wilson", "age": 35, "email": "bob@example.com"},
                 {"id": "4", "name": "Alice Brown", "age": 29, "email": "alice@example.com"}
+            ],
+            "columns": [
+                {"label": "ID", "key": "id"},
+                {"label": "Name", "key": "name"},
+                {"label": "Age", "key": "age"},
+                {"label": "Email", "key": "email"}
             ]
         }
     elif 'button' in component_lower:
@@ -361,7 +427,7 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
     
     <div class="preview-section">
         <h2>📊 Component Analysis</h2>
-        <p style="line-height: 1.6; color: #666;">{analysis_preview}</p>
+        <pre style="line-height: 1.6; color: #666; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">{analysis_preview}</pre>
     </div>
     
     <!-- Error display for debugging -->

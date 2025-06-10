@@ -202,6 +202,35 @@ The system handles common failures gracefully:
 
 ## Security Considerations
 
+### Walled Garden Dependency Management
+The system implements a **Walled Garden security architecture** to prevent dependency violations:
+
+**Approved Dependencies:**
+- `react` (available globally as React)
+- `react-dom` (available globally as ReactDOM)  
+- `lodash` (available globally as _)
+- Tailwind CSS classes only
+
+**Security Enforcement:**
+- `ast_validator.py`: Validates all imports against approved dependency list
+- `openui_client.py`: Automatic detection and remediation of dependency violations
+- `crew_agents.py`: Enhanced prompts with explicit security constraints
+- `component-library.md`: Documentation of approved patterns and restrictions
+
+**Automatic Remediation:**
+When disallowed dependencies are detected (e.g., react-table, moment, d3), the system:
+1. Detects violations during AST validation
+2. Automatically requests component rewrite using only approved dependencies
+3. Guides AI to implement functionality manually using approved libraries
+4. Validates final result to ensure compliance
+
+**Proven Success:**
+- ✅ Prevents "useTable is not defined" errors
+- ✅ Catches FontAwesome, react-table, d3 violations  
+- ✅ Self-healing through AI collaboration
+- ✅ Maintains functionality while enforcing security
+
+**API Security:**
 - API keys are loaded from environment variables only
 - `.env` and API key files are gitignored
 - Cookie files contain session data and should not be committed

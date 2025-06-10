@@ -78,6 +78,38 @@ class OpenUIClient:
                     print(f"❌ Max retries ({max_retries}) reached for truncated response")
                     return accumulated_response  # Return what we have
             
+            elif validation["status"] == "DEPENDENCY_ERROR":
+                if attempt < max_retries:
+                    print(f"🚫 Dependency violation detected, requesting fix...")
+                    
+                    # Create a dependency fix prompt - this is critical for security
+                    fix_prompt = f"""CRITICAL: The component uses disallowed dependencies.
+
+Error: {validation['details']}
+
+Current problematic code:
+```jsx
+{accumulated_response}
+```
+
+You MUST rewrite this component using ONLY these approved libraries:
+- react (available globally as React)
+- react-dom (available globally as ReactDOM)  
+- lodash (available globally as _)
+- Tailwind CSS classes only
+
+DO NOT import react-table, moment, d3, or any other external libraries.
+Implement the functionality manually using the approved dependencies above.
+
+Please provide the complete, corrected component that uses only approved dependencies."""
+                    
+                    # Reset conversation with fix prompt - dependency violations require complete rewrite
+                    conversation = [{"role": "user", "content": fix_prompt}]
+                    accumulated_response = ""  # Reset since we're asking for a complete rewrite
+                else:
+                    print(f"❌ Max retries ({max_retries}) reached for dependency violations")
+                    return accumulated_response  # Return what we have
+            
             elif validation["status"] == "SYNTAX_ERROR":
                 if attempt < max_retries:
                     print(f"🔧 Syntax error detected, attempting to fix...")

@@ -182,19 +182,25 @@ import { Pagination } from './components/Pagination';
         """Generate initial component using OpenUI"""
         print("🎨 Generating initial component with OpenUI...")
         
-        # Load component library reference
-        component_library_info = self._get_component_library_info()
-        
         enhanced_prompt = f"""
         Create a React component: {requirements}
         
-        COMPONENT LIBRARY AVAILABLE:
-        {component_library_info}
-        
         CRITICAL INSTRUCTIONS:
-        - If your component needs pagination, USE the existing Pagination component (see above)
         - Use complete Tailwind class names - NEVER use "..." or placeholders
-        - Follow the design system patterns provided above
+        - Implement all functionality from scratch using only approved dependencies
+        
+        🚨 SECURITY CONSTRAINT - APPROVED DEPENDENCIES ONLY:
+        You MUST only use these libraries:
+        - react (available globally as React)
+        - react-dom (available globally as ReactDOM)  
+        - lodash (available globally as _)
+        - Tailwind CSS classes only
+        
+        DO NOT import react-table, moment, d3, or ANY other external libraries.
+        If you need table functionality, implement it manually using React state and lodash.
+        If you need pagination, create simple Previous/Next buttons with Tailwind styling.
+        If you need date functionality, use native Date objects or lodash.
+        If you need data visualization, use CSS and manual calculations.
         
         Requirements:
         - React functional component with TypeScript
@@ -265,9 +271,6 @@ import { Pagination } from './components/Pagination';
         """Refine component based on improvements"""
         print("✨ Refining component...")
         
-        # Load component library reference
-        component_library_info = self._get_component_library_info()
-        
         refinement_prompt = f"""
         Improve this React component based on the analysis and suggestions:
         
@@ -275,9 +278,6 @@ import { Pagination } from './components/Pagination';
         ```jsx
         {component_code}
         ```
-        
-        COMPONENT LIBRARY AVAILABLE:
-        {component_library_info}
         
         REQUIREMENTS:
         {requirements}
@@ -289,11 +289,22 @@ import { Pagination } from './components/Pagination';
         {improvements}
         
         CRITICAL INSTRUCTIONS:
-        - If the component needs pagination, REPLACE any existing pagination with the Pagination component from above
         - Use complete Tailwind class names - NEVER use "..." or placeholders  
-        - Follow the design system patterns provided
         - ALL interactive elements (buttons, inputs, etc.) MUST be fully styled
-        - Prefer using existing components over creating everything from scratch
+        - Implement all functionality from scratch using only approved dependencies
+        
+        🚨 SECURITY CONSTRAINT - APPROVED DEPENDENCIES ONLY:
+        You MUST only use these libraries:
+        - react (available globally as React)
+        - react-dom (available globally as ReactDOM)  
+        - lodash (available globally as _)
+        - Tailwind CSS classes only
+        
+        DO NOT import react-table, moment, d3, or ANY other external libraries.
+        DO NOT import from './components/...' - implement everything inline.
+        If you need table functionality, implement it manually using React state and lodash.
+        If you need pagination, create simple Previous/Next buttons with Tailwind styling.
+        If you need date functionality, use native Date objects or lodash.
         
         Please provide the improved component code that addresses the identified issues.
         Focus on the highest priority improvements first, including using existing components.

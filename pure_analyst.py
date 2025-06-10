@@ -161,8 +161,13 @@ class PureFrameworkAnalyst:
 
 def test_pure_analyst():
     """Test the PURE framework analyst"""
-    # Use the API key directly for testing
-    analyst = PureFrameworkAnalyst(api_key="AIzaSyBBG1jL8WDFviJijFc59wPMPkSAhHnXy8s")
+    # Use environment variable for API key
+    import os
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        print("Please set GEMINI_API_KEY environment variable")
+        return
+    analyst = PureFrameworkAnalyst(api_key=api_key)
     
     sample_code = """
     import React from 'react';

@@ -14,6 +14,20 @@ from typing import Dict, Any, Optional
 class ASTValidator:
     """Validates React/TypeScript component syntax using Babel AST parsing"""
     
+    # Approved dependencies - must match component-library.md
+    APPROVED_DEPENDENCIES = {
+        'react',
+        'react-dom', 
+        'lodash'
+    }
+    
+    # Dependencies that should be accessed globally, not imported
+    GLOBAL_DEPENDENCIES = {
+        'react': 'React',
+        'react-dom': 'ReactDOM', 
+        'lodash': '_'
+    }
+    
     def __init__(self):
         self.babel_available = self._check_babel_availability()
     
@@ -26,13 +40,54 @@ class ASTValidator:
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             return False
     
+    def _validate_dependencies(self, code: str) -> Dict[str, str]:
+        """
+        Validate that all imports are from approved dependencies
+        
+        Returns:
+            Dict with 'status' (VALID/INVALID) and 'details'
+        """
+        import re
+        
+        # Find all import statements
+        import_pattern = r'import\s+.*?\s+from\s+[\'"]([^\'"]+)[\'"]'
+        imports = re.findall(import_pattern, code)
+        
+        # Also check for dynamic imports
+        dynamic_import_pattern = r'import\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)'
+        dynamic_imports = re.findall(dynamic_import_pattern, code)
+        
+        all_imports = imports + dynamic_imports
+        
+        disallowed_imports = []
+        for import_source in all_imports:
+            # Reject ALL relative imports - no component library allowed
+            if import_source.startswith('.'):
+                disallowed_imports.append(f"{import_source} (relative imports not allowed)")
+                continue
+                
+            # Check if it's an approved dependency
+            if import_source not in self.APPROVED_DEPENDENCIES:
+                disallowed_imports.append(import_source)
+        
+        if disallowed_imports:
+            disallowed_list = ', '.join(disallowed_imports)
+            approved_list = ', '.join(sorted(self.APPROVED_DEPENDENCIES))
+            
+            return {
+                'status': 'INVALID',
+                'details': f"Disallowed imports detected: {disallowed_list}. Only these libraries are approved: {approved_list}. Please rewrite the component using only approved dependencies or our existing components."
+            }
+        
+        return {'status': 'VALID', 'details': 'All imports are approved'}
+    
     def validate_component(self, code: str) -> Dict[str, Any]:
         """
         Validate React component syntax and completeness
         
         Returns:
             {
-                "status": "COMPLETE" | "TRUNCATED" | "SYNTAX_ERROR",
+                "status": "COMPLETE" | "TRUNCATED" | "SYNTAX_ERROR" | "DEPENDENCY_ERROR",
                 "details": "Error message or completion info",
                 "error_location": {"line": int, "column": int} or None
             }
@@ -41,6 +96,15 @@ class ASTValidator:
             return {
                 "status": "SYNTAX_ERROR",
                 "details": "Empty or whitespace-only code",
+                "error_location": None
+            }
+        
+        # CRITICAL: First check for dependency violations (security enforcement)
+        dependency_check = self._validate_dependencies(code)
+        if dependency_check['status'] != 'VALID':
+            return {
+                "status": "DEPENDENCY_ERROR",
+                "details": dependency_check['details'],
                 "error_location": None
             }
         

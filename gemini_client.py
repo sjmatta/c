@@ -14,6 +14,12 @@ class GeminiClient:
             api_key = os.getenv('GEMINI_API_KEY', 'your-api-key-here')
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-1.5-pro')
+        
+        # Image generation model (Imagen 3 via Gemini)
+        try:
+            self.image_model = genai.GenerativeModel('gemini-1.5-pro')
+        except:
+            self.image_model = None
     
     def analyze_component(self, component_code, requirements):
         """
@@ -122,6 +128,68 @@ class GeminiClient:
             return response.text
         except Exception as e:
             print(f"Gemini test generation failed: {e}")
+            return None
+    
+    def generate_placeholder_image_description(self, component_type, context=""):
+        """Generate description for AI-generated placeholder images"""
+        prompt = f"""
+        Generate a detailed description for a placeholder image that would be perfect for a {component_type} component.
+        
+        Context: {context}
+        
+        The description should be:
+        - Professional and modern
+        - Suitable for UI/UX design
+        - Specific enough for AI image generation
+        - Appropriate for the component type
+        
+        Examples:
+        - For a profile card: "Professional headshot of a person in business attire, clean background, modern lighting"
+        - For a product card: "Minimalist product photography of a modern gadget on clean white background"
+        - For a hero section: "Abstract geometric patterns in soft blue and white, modern and professional"
+        
+        Provide just the image description, no extra text.
+        """
+        
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text.strip()
+        except Exception as e:
+            print(f"Gemini image description generation failed: {e}")
+            # Fallback descriptions
+            fallbacks = {
+                'button': 'Modern abstract background with soft gradients in blue and white',
+                'card': 'Clean minimalist design with subtle shadows and modern typography',
+                'table': 'Professional data visualization with clean lines and modern design',
+                'form': 'Clean interface design with modern input fields and soft colors',
+                'hero': 'Abstract geometric patterns in professional blue and white colors'
+            }
+            return fallbacks.get(component_type.lower(), 'Modern, clean, professional design background')
+    
+    def suggest_component_enhancements(self, component_code, component_type):
+        """Suggest AI-generated content enhancements for components"""
+        prompt = f"""
+        Analyze this {component_type} component and suggest specific enhancements:
+        
+        ```jsx
+        {component_code}
+        ```
+        
+        Provide suggestions for:
+        1. **Icons**: Which Heroicons would enhance this component? Be specific with icon names.
+        2. **Images**: What kind of placeholder images would improve the design?
+        3. **Content**: Suggest realistic sample content (text, data, etc.)
+        4. **Animations**: What Tailwind animations would enhance UX?
+        5. **Variants**: What style variants would be useful?
+        
+        Format as actionable recommendations a developer can implement.
+        """
+        
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            print(f"Gemini enhancement suggestions failed: {e}")
             return None
 
 
