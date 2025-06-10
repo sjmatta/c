@@ -25,30 +25,122 @@ class IntelligentPropGenerator:
         props = self._analyze_typescript_interfaces(component_code)
         if props:
             print("✅ Generated props from TypeScript interfaces")
-            return props
+            return self._validate_and_fix_props(props, component_code, component_name)
         
         # Layer 2: Component Signature Analysis  
         props = self._analyze_component_signature(component_code)
         if props:
             print("✅ Generated props from component signature")
-            return props
+            return self._validate_and_fix_props(props, component_code, component_name)
             
         # Layer 3: Usage Pattern Analysis
         props = self._analyze_prop_usage_patterns(component_code)
         if props:
             print("✅ Generated props from usage patterns")
-            return props
+            return self._validate_and_fix_props(props, component_code, component_name)
             
         # Layer 4: AI-Powered Analysis
         props = self._ai_analyze_component(component_code, component_name)
         if props:
             print("✅ Generated props using AI analysis")
-            return props
+            return self._validate_and_fix_props(props, component_code, component_name)
             
         # Layer 5: Fallback to basic inference
         props = self._basic_prop_inference(component_code)
         print("⚠️  Using basic prop inference fallback")
-        return props
+        
+        # Critical validation layer to prevent array regressions
+        validated_props = self._validate_and_fix_props(props, component_code, component_name)
+        return validated_props
+    
+    def _validate_and_fix_props(self, props: Dict[str, Any], component_code: str, component_name: str) -> Dict[str, Any]:
+        """
+        Critical validation to prevent array regressions.
+        Ensures that props expected to be arrays are actually arrays.
+        """
+        
+        if not props:
+            return props
+        
+        validated_props = props.copy()
+        
+        # Detect array usage patterns in the component code
+        for prop_name, prop_value in props.items():
+            
+            # Check if this prop is used with array methods
+            array_usage_patterns = [
+                rf'{re.escape(prop_name)}\.map\s*\(',
+                rf'{re.escape(prop_name)}\.filter\s*\(',
+                rf'{re.escape(prop_name)}\.slice\s*\(',
+                rf'{re.escape(prop_name)}\.length\b',
+                rf'{re.escape(prop_name)}\.forEach\s*\(',
+                rf'{re.escape(prop_name)}\.reduce\s*\('
+            ]
+            
+            is_used_as_array = any(re.search(pattern, component_code) for pattern in array_usage_patterns)
+            
+            if is_used_as_array and not isinstance(prop_value, list):
+                print(f"🚨 CRITICAL FIX: {prop_name} is used as array but generated as {type(prop_value)}")
+                
+                # Extract the expected type from TypeScript interfaces for this prop
+                fixed_array = self._extract_and_generate_array_for_prop(prop_name, component_code)
+                if fixed_array:
+                    validated_props[prop_name] = fixed_array
+                    print(f"✅ Fixed {prop_name} with proper array structure")
+                else:
+                    # Ultimate fallback - generic array based on component type
+                    validated_props[prop_name] = self._generate_emergency_array(prop_name, component_name)
+                    print(f"⚠️  Applied emergency array fix for {prop_name}")
+        
+        return validated_props
+    
+    def _extract_and_generate_array_for_prop(self, prop_name: str, component_code: str) -> Optional[List[Dict[str, Any]]]:
+        """Extract TypeScript interface info for a specific prop and generate proper array"""
+        
+        # Look for TypeScript interface that defines this prop
+        interface_pattern = rf'interface\s+\w*Props\s*\{{[^}}]*{re.escape(prop_name)}\s*:\s*([^;,}}]+)'
+        match = re.search(interface_pattern, component_code, re.DOTALL)
+        
+        if match:
+            prop_type = match.group(1).strip()
+            print(f"🔍 Found TypeScript type for {prop_name}: {prop_type}")
+            
+            if 'Array<' in prop_type or '[]' in prop_type:
+                return self._generate_typed_array(prop_type, prop_name)
+        
+        return None
+    
+    def _generate_emergency_array(self, prop_name: str, component_name: str) -> List[Dict[str, Any]]:
+        """Emergency fallback array generation based on component type"""
+        
+        component_lower = component_name.lower()
+        prop_lower = prop_name.lower()
+        
+        if 'table' in component_lower or 'datatable' in component_lower:
+            return [
+                {"id": 1, "name": "Alice Johnson", "age": 28, "email": "alice@example.com"},
+                {"id": 2, "name": "Bob Wilson", "age": 34, "email": "bob@example.com"},
+                {"id": 3, "name": "Charlie Brown", "age": 42, "email": "charlie@example.com"}
+            ]
+        elif 'timeline' in component_lower:
+            return [
+                {"id": 1, "date": "2024-01-15", "title": "Project Started", "description": "Initial planning phase"},
+                {"id": 2, "date": "2024-02-15", "title": "Development Milestone", "description": "Core features implemented"},
+                {"id": 3, "date": "2024-03-15", "title": "Testing Phase", "description": "Quality assurance testing"}
+            ]
+        elif 'list' in component_lower or 'item' in prop_lower:
+            return [
+                {"id": 1, "title": "Item 1", "description": "First item description"},
+                {"id": 2, "title": "Item 2", "description": "Second item description"},
+                {"id": 3, "title": "Item 3", "description": "Third item description"}
+            ]
+        else:
+            # Generic array
+            return [
+                {"id": 1, "name": "Sample Item 1", "value": "Sample Value 1"},
+                {"id": 2, "name": "Sample Item 2", "value": "Sample Value 2"},
+                {"id": 3, "name": "Sample Item 3", "value": "Sample Value 3"}
+            ]
     
     def _analyze_typescript_interfaces(self, code: str) -> Optional[Dict[str, Any]]:
         """Extract and generate props from TypeScript interface definitions"""
@@ -218,9 +310,9 @@ class IntelligentPropGenerator:
         
         type_str = type_str.strip()
         
-        # Array types
+        # Array types - Enhanced parsing for complex array types
         if '[]' in type_str or 'Array<' in type_str:
-            return self._generate_sample_array(prop_name, "")
+            return self._generate_typed_array(type_str, prop_name)
             
         # Union types ('primary' | 'secondary')
         if '|' in type_str:
@@ -239,6 +331,123 @@ class IntelligentPropGenerator:
             
         # Object types or custom interfaces
         return self._generate_sample_object(prop_name, "")
+    
+    def _generate_typed_array(self, type_str: str, prop_name: str) -> List[Dict[str, Any]]:
+        """Generate array data based on TypeScript array type definition"""
+        
+        # Extract array element type from Array<Type> or Type[]
+        element_type = None
+        
+        if 'Array<' in type_str:
+            # Extract from Array<{...}> or Array<Type>
+            start = type_str.find('Array<') + 6
+            depth = 1
+            end = start
+            
+            for i, char in enumerate(type_str[start:], start):
+                if char == '<':
+                    depth += 1
+                elif char == '>':
+                    depth -= 1
+                    if depth == 0:
+                        end = i
+                        break
+            
+            element_type = type_str[start:end].strip()
+        
+        elif type_str.endswith('[]'):
+            # Extract from Type[]
+            element_type = type_str[:-2].strip()
+        
+        if not element_type:
+            print(f"⚠️  Could not parse array type: {type_str}, using fallback")
+            return self._generate_sample_array(prop_name, "")
+        
+        # Parse element type structure
+        if element_type.startswith('{') and element_type.endswith('}'):
+            # Object type: { id: number; name: string; age: number; }
+            return self._generate_array_from_object_type(element_type, prop_name)
+        else:
+            # Simple type or complex type
+            print(f"📝 Generating array for element type: {element_type}")
+            return self._generate_sample_array(prop_name, element_type)
+    
+    def _generate_array_from_object_type(self, object_type: str, prop_name: str) -> List[Dict[str, Any]]:
+        """Generate array data from object type definition like { id: number; name: string; }"""
+        
+        print(f"🔍 Parsing object type: {object_type}")
+        
+        # Remove braces and parse properties
+        properties_str = object_type.strip('{}').strip()
+        
+        # Split by semicolon or comma
+        prop_definitions = [p.strip() for p in re.split(r'[;,]', properties_str) if p.strip()]
+        
+        sample_object = {}
+        
+        for prop_def in prop_definitions:
+            # Parse: propName: type or propName?: type
+            match = re.match(r'(\w+)(\?)?:\s*(.+)', prop_def.strip())
+            if match:
+                prop_name_inner, optional, prop_type = match.groups()
+                sample_value = self._generate_value_for_simple_type(prop_type.strip(), prop_name_inner)
+                sample_object[prop_name_inner] = sample_value
+        
+        if not sample_object:
+            print("⚠️  Could not parse object properties, using fallback")
+            return self._generate_sample_array(prop_name, "")
+        
+        # Generate 3 sample objects with realistic variations
+        return [
+            self._vary_sample_object(sample_object, 1),
+            self._vary_sample_object(sample_object, 2), 
+            self._vary_sample_object(sample_object, 3)
+        ]
+    
+    def _generate_value_for_simple_type(self, type_str: str, prop_name: str) -> Any:
+        """Generate value for simple TypeScript types (used in object parsing)"""
+        
+        type_str = type_str.strip()
+        
+        if type_str == 'string':
+            return self._generate_sample_string(prop_name)
+        elif type_str == 'number':
+            if 'id' in prop_name.lower():
+                return 1  # Will be varied in _vary_sample_object
+            elif 'age' in prop_name.lower():
+                return 28  # Will be varied
+            else:
+                return 42
+        elif type_str == 'boolean':
+            return True
+        else:
+            # Unknown type, make a reasonable guess
+            return f"sample {prop_name}"
+    
+    def _vary_sample_object(self, base_object: Dict[str, Any], index: int) -> Dict[str, Any]:
+        """Create variations of the sample object for realistic data"""
+        
+        varied = base_object.copy()
+        
+        for key, value in varied.items():
+            if key.lower() == 'id':
+                varied[key] = index
+            elif key.lower() == 'name':
+                names = ["Alice Johnson", "Bob Wilson", "Charlie Brown", "Diana Prince", "Eva Martinez"]
+                varied[key] = names[index - 1] if index <= len(names) else f"User {index}"
+            elif key.lower() == 'age':
+                ages = [28, 34, 42, 25, 31]
+                varied[key] = ages[index - 1] if index <= len(ages) else 20 + index * 5
+            elif key.lower() in ['email', 'mail']:
+                emails = ["alice@example.com", "bob@example.com", "charlie@example.com"]
+                varied[key] = emails[index - 1] if index <= len(emails) else f"user{index}@example.com"
+            elif key.lower() in ['title', 'position', 'role']:
+                titles = ["Software Engineer", "Product Manager", "Designer", "Data Analyst"]
+                varied[key] = titles[index - 1] if index <= len(titles) else f"Role {index}"
+            elif isinstance(value, str) and not any(x in key.lower() for x in ['name', 'email', 'title']):
+                varied[key] = f"{value} {index}"
+        
+        return varied
     
     def _generate_sample_array(self, prop_name: str, context: str) -> List[Dict[str, Any]]:
         """Generate contextual sample array data"""

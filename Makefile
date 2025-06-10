@@ -111,7 +111,7 @@ demo:
 		grep -E '"(final_score|iterations)"' $(OUTPUT) || echo "Results file created"; \
 		echo ""; \
 		echo "🎨 Generating interactive preview..."; \
-		$(PYTHON) unified_unified_preview_generator.py $(OUTPUT) preview.html; \
+		$(PYTHON) unified_preview_generator.py $(OUTPUT) preview.html; \
 		echo ""; \
 		echo "🌐 Open preview.html in your browser to interact with the component!"; \
 		which open >/dev/null && open preview.html || echo "   Or run: open preview.html"; \
@@ -227,7 +227,7 @@ simple:
 preview:
 	@if [ -f $(OUTPUT) ]; then \
 		echo "🎨 Generating interactive preview from $(OUTPUT)..."; \
-		$(PYTHON) unified_unified_preview_generator.py $(OUTPUT) preview.html; \
+		$(PYTHON) unified_preview_generator.py $(OUTPUT) preview.html; \
 		echo "🌐 Opening preview..."; \
 		which open >/dev/null && open preview.html || echo "   Run: open preview.html"; \
 	else \
