@@ -25,13 +25,13 @@ class OpenUIClient:
             print(f"Cookie file {cookie_file} not found. Run get_openui_cookie.py first.")
             return {}
     
-    def create_component(self, prompt, model="gpt-3.5-turbo", max_tokens=32000):
+    def create_component(self, prompt, model="gpt-3.5-turbo"):
         """
         Create a component using OpenUI's chat completions endpoint with automatic continuation
         """
-        return self.create_component_with_continuation(prompt, model, max_tokens)
+        return self.create_component_with_continuation(prompt, model)
     
-    def create_component_with_continuation(self, prompt, model="gpt-3.5-turbo", max_tokens=32000, max_retries=3):
+    def create_component_with_continuation(self, prompt, model="gpt-3.5-turbo", max_retries=3):
         """
         Create a component with automatic continuation for truncated responses
         """
@@ -44,7 +44,7 @@ class OpenUIClient:
             print(f"\n📡 Attempt {attempt + 1}/{max_retries + 1}")
             
             # Make the API call
-            response_data = self._make_api_call(conversation, model, max_tokens)
+            response_data = self._make_api_call(conversation, model)
             if not response_data:
                 print(f"❌ API call failed on attempt {attempt + 1}")
                 continue
@@ -135,7 +135,7 @@ Please analyze the error, fix the code, and provide the complete, corrected comp
         print(f"❌ Component generation failed after all attempts")
         return accumulated_response
     
-    def _make_api_call(self, conversation, model, max_tokens):
+    def _make_api_call(self, conversation, model):
         """Make a single API call and return the response data"""
         url = f"{self.base_url}/v1/chat/completions"
         
@@ -148,7 +148,6 @@ Please analyze the error, fix the code, and provide the complete, corrected comp
         payload = {
             "model": model,
             "messages": conversation,
-            "max_tokens": max_tokens,
             "temperature": 0.7,
             "stream": True
         }

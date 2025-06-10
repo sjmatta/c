@@ -185,9 +185,63 @@ import { Pagination } from './components/Pagination';
         enhanced_prompt = f"""
         Create a React component: {requirements}
         
+        🎨 MODERN DESIGN REQUIREMENTS - CREATE BEAUTIFUL, VISUALLY APPEALING COMPONENTS:
+        
+        **COLOR PALETTE & VISUAL HIERARCHY:**
+        - Use rich, modern color schemes with proper contrast
+        - Primary colors: blue-600, indigo-600, purple-600, emerald-600
+        - Accent colors: amber-500, rose-500, cyan-500, violet-500  
+        - Neutral grays: slate-50, slate-100, slate-200, slate-600, slate-700, slate-800
+        - Background gradients: "bg-gradient-to-r from-blue-600 to-purple-600"
+        
+        **TABLE STYLING (if applicable):**
+        - Container: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+        - Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 text-left text-sm font-semibold text-slate-900 uppercase tracking-wider border-b border-slate-200"
+        - ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50"
+        - Row hover: "hover:bg-blue-50/50 transition-colors duration-200"
+        - Cells: "px-6 py-4 text-sm text-slate-700 border-b border-slate-100"
+        - Action buttons in rows: Use colored badges with "bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-medium"
+        
+        **BUTTON DESIGNS:**
+        - Primary: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+        - Secondary: "bg-white border-2 border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+        - Destructive: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+        
+        **PAGINATION STYLING:**
+        - Container: "flex items-center justify-center gap-3 py-6 bg-slate-50/50 rounded-lg"
+        - Page numbers: "h-10 w-10 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 text-slate-600 font-medium flex items-center justify-center transition-all duration-200"
+        - Active page: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold flex items-center justify-center shadow-lg"
+        - Prev/Next: "px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 text-slate-600 font-medium transition-all duration-200"
+        - Disabled: "opacity-40 cursor-not-allowed hover:bg-white hover:border-slate-200 hover:text-slate-600"
+        
+        **CARD COMPONENTS:**
+        - Container: "bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+        - Header: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200"
+        - Body: "p-6 space-y-4"
+        - Footer: "px-6 py-4 bg-slate-50/50 border-t border-slate-200"
+        
+        **FORM ELEMENTS:**
+        - Inputs: "border-2 border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+        - Labels: "text-sm font-semibold text-slate-700 mb-2 block"
+        - Error states: "border-red-300 focus:border-red-500 focus:ring-red-100"
+        
+        **HOVER & INTERACTIVE STATES:**
+        - All interactive elements MUST have smooth transitions: "transition-all duration-200"
+        - Use subtle transforms: "hover:-translate-y-0.5" for buttons
+        - Color transitions: "hover:bg-blue-50" with proper color progression
+        - Shadow enhancements: "hover:shadow-xl" for elevated elements
+        
+        **VISUAL ENHANCEMENTS:**
+        - Use icons (Unicode symbols): ▲ ▼ for sorting, ← → for navigation
+        - Add loading states with opacity changes: "opacity-75"
+        - Use badge components: "bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"
+        - Add status indicators with colored dots: "h-2 w-2 rounded-full bg-green-500"
+        
         CRITICAL INSTRUCTIONS:
         - Use complete Tailwind class names - NEVER use "..." or placeholders
         - Implement all functionality from scratch using only approved dependencies
+        - EVERY element must be beautifully styled - NO unstyled or boring elements
+        - Create visual hierarchy with typography, spacing, and color
         
         🚨 SECURITY CONSTRAINT - APPROVED DEPENDENCIES ONLY:
         You MUST only use these libraries:
@@ -198,29 +252,16 @@ import { Pagination } from './components/Pagination';
         
         DO NOT import react-table, moment, d3, or ANY other external libraries.
         If you need table functionality, implement it manually using React state and lodash.
-        If you need pagination, create simple Previous/Next buttons with Tailwind styling.
+        If you need pagination, create beautiful pagination with the styles above.
         If you need date functionality, use native Date objects or lodash.
         If you need data visualization, use CSS and manual calculations.
         
         Requirements:
         - React functional component with TypeScript
         - Use ONLY Tailwind CSS classes (no custom CSS)
-        - Include hover/focus states and proper accessibility
-        - Make it responsive
-        - Prefer using existing components over creating everything from scratch
-        
-        PAGINATION STYLING REQUIREMENTS (if applicable):
-        - Pagination container: "flex items-center justify-center gap-2 py-4"
-        - Regular buttons: "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-        - Number buttons: Use "h-10 w-10" instead of "px-4 py-2" for square buttons
-        - Active page button: Add "bg-blue-600 text-white hover:bg-blue-600/90" classes
-        - Disabled buttons: Add "opacity-50 cursor-not-allowed" classes
-        
-        Examples of complete Tailwind classes:
-        - Button: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
-        - Card: "bg-white rounded-lg shadow-lg p-6"
-        - Table: "min-w-full bg-white border border-gray-200"
-        - Input: "border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        - Include beautiful hover/focus states with transitions
+        - Make it responsive with proper breakpoints
+        - Create visually stunning, modern components that users will love
         
         Format as:
         ```jsx
@@ -232,7 +273,7 @@ import { Pagination } from './components/Pagination';
         
         const Component: React.FC<Props> = (props) => {{
           return (
-            // JSX with complete Tailwind classes - NO UNSTYLED ELEMENTS
+            // JSX with beautiful, complete Tailwind classes - MAKE IT STUNNING
           );
         }};
         
@@ -288,10 +329,37 @@ import { Pagination } from './components/Pagination';
         IMPROVEMENTS TO IMPLEMENT:
         {improvements}
         
+        🎨 ENHANCED DESIGN REQUIREMENTS - MAKE THIS COMPONENT STUNNING:
+        Apply the same modern design principles for visual enhancement:
+        
+        **TABLE STYLING UPGRADE:**
+        - Replace basic tables with: "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+        - Headers: "bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 text-left text-sm font-semibold text-slate-900 uppercase tracking-wider border-b border-slate-200"
+        - IMPLEMENT ZEBRA STRIPING: "odd:bg-white even:bg-slate-50/50"
+        - Row hover: "hover:bg-blue-50/50 transition-colors duration-200"
+        - Cells: "px-6 py-4 text-sm text-slate-700 border-b border-slate-100"
+        
+        **BUTTON ENHANCEMENT:**
+        - Upgrade plain buttons to: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+        - Secondary buttons: "bg-white border-2 border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+        
+        **PAGINATION BEAUTY:**
+        - Container: "flex items-center justify-center gap-3 py-6 bg-slate-50/50 rounded-lg"
+        - Page numbers: "h-10 w-10 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 text-slate-600 font-medium flex items-center justify-center transition-all duration-200"
+        - Active page: "h-10 w-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold flex items-center justify-center shadow-lg"
+        
+        **COLOR & VISUAL HIERARCHY:**
+        - Rich color palette: blue-600, indigo-600, purple-600, emerald-600
+        - Neutral grays: slate-50, slate-100, slate-200, slate-600, slate-700, slate-800
+        - Add gradients: "bg-gradient-to-r from-blue-600 to-purple-600"
+        - Badge components: "bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"
+        
         CRITICAL INSTRUCTIONS:
         - Use complete Tailwind class names - NEVER use "..." or placeholders  
-        - ALL interactive elements (buttons, inputs, etc.) MUST be fully styled
+        - ALL interactive elements (buttons, inputs, etc.) MUST be beautifully styled
         - Implement all functionality from scratch using only approved dependencies
+        - TRANSFORM this into a visually stunning, modern component
+        - Add smooth transitions to ALL interactive elements: "transition-all duration-200"
         
         🚨 SECURITY CONSTRAINT - APPROVED DEPENDENCIES ONLY:
         You MUST only use these libraries:
@@ -303,11 +371,11 @@ import { Pagination } from './components/Pagination';
         DO NOT import react-table, moment, d3, or ANY other external libraries.
         DO NOT import from './components/...' - implement everything inline.
         If you need table functionality, implement it manually using React state and lodash.
-        If you need pagination, create simple Previous/Next buttons with Tailwind styling.
+        If you need pagination, create beautiful pagination with the styles above.
         If you need date functionality, use native Date objects or lodash.
         
         Please provide the improved component code that addresses the identified issues.
-        Focus on the highest priority improvements first, including using existing components.
+        Focus on visual improvements and modern design while maintaining functionality.
         """
         
         return self.openui_client.create_component(refinement_prompt)

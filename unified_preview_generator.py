@@ -98,7 +98,8 @@ def transpile_component_with_babel(component_code, component_name):
     prepared_code = re.sub(r'^import\s+.*?;?\s*(?://.*)?$', '', prepared_code, flags=re.MULTILINE)
     
     # Remove export statements and assign to window for global access
-    prepared_code = re.sub(r'export\s+default\s+(\w+)\s*;', f'window.{component_name} = \\1;', prepared_code)
+    window_assignment = f'window.{component_name} = \\1;'
+    prepared_code = re.sub(r'export\s+default\s+(\w+)\s*;', window_assignment, prepared_code)
     
     # Add React destructuring at the top
     prepared_code = '''
@@ -280,10 +281,10 @@ def generate_sample_props(component_code, component_name):
                 {"id": "4", "name": "Alice Brown", "age": 29, "email": "alice@example.com"}
             ],
             "columns": [
-                {"label": "ID", "key": "id"},
-                {"label": "Name", "key": "name"},
-                {"label": "Age", "key": "age"},
-                {"label": "Email", "key": "email"}
+                {"header": "ID", "accessor": "id", "sortable": True},
+                {"header": "Name", "accessor": "name", "sortable": True},
+                {"header": "Age", "accessor": "age", "sortable": True},
+                {"header": "Email", "accessor": "email", "sortable": False}
             ]
         }
     elif 'button' in component_lower:
@@ -345,7 +346,7 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
     # Format analysis for better display (convert markdown-like formatting to HTML)
     analysis_preview = format_analysis_for_html(analysis)
     
-    return f'''<!DOCTYPE html>
+    template = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -366,62 +367,62 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
     <script src="https://unpkg.com/lodash@4/lodash.min.js" crossorigin></script>
     
     <style>
-        body {{
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f8f9fa;
-        }}
+        }
         
-        .header {{
+        .header {
             text-align: center;
             margin-bottom: 40px;
             padding: 20px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
+        }
         
-        .preview-section {{
+        .preview-section {
             background: white;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-        }}
+        }
         
-        .metrics {{
+        .metrics {
             display: flex;
             justify-content: center;
             gap: 20px;
             margin-top: 20px;
             flex-wrap: wrap;
-        }}
+        }
         
-        .metric {{
+        .metric {
             background: #007bff;
             color: white;
             padding: 12px 20px;
             border-radius: 8px;
             text-align: center;
             min-width: 120px;
-        }}
+        }
         
-        .metric.score {{
+        .metric.score {
             background: #fd7e14;
-        }}
+        }
         
-        .metric-value {{
+        .metric-value {
             font-size: 24px;
             font-weight: bold;
-        }}
+        }
         
-        .metric-label {{
+        .metric-label {
             font-size: 12px;
             opacity: 0.9;
-        }}
+        }
         
-        .error-display {{
+        .error-display {
             background: #fee;
             border: 1px solid #fcc;
             color: #800;
@@ -429,9 +430,9 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
             border-radius: 4px;
             margin: 20px 0;
             font-family: monospace;
-        }}
+        }
         
-        .analysis-content {{
+        .analysis-content {
             line-height: 1.6;
             color: #444;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -442,30 +443,30 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
             background: #f9f9f9;
             border-radius: 8px;
             border: 1px solid #e1e1e1;
-        }}
+        }
         
         .analysis-content h1,
         .analysis-content h2,
-        .analysis-content h3 {{
+        .analysis-content h3 {
             color: #333;
             margin-top: 20px;
             margin-bottom: 10px;
-        }}
+        }
         
-        .analysis-content strong {{
+        .analysis-content strong {
             color: #333;
             font-weight: 600;
-        }}
+        }
         
-        .analysis-content code {{
+        .analysis-content code {
             background: #e8e8e8;
             padding: 2px 4px;
             border-radius: 3px;
             font-family: 'Monaco', 'Consolas', monospace;
             font-size: 0.9em;
-        }}
+        }
         
-        .analysis-content .code-block {{
+        .analysis-content .code-block {
             background: #f4f4f4;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -475,14 +476,14 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
             font-size: 0.85em;
             overflow-x: auto;
             white-space: pre;
-        }}
+        }
         
-        .analysis-content h2 {{
+        .analysis-content h2 {
             border-bottom: 2px solid #e1e1e1;
             padding-bottom: 5px;
             margin-top: 25px;
             margin-bottom: 15px;
-        }}
+        }
     </style>
 </head>
 <body>
@@ -519,19 +520,19 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
     
     <script>
         // Error handling
-        window.addEventListener('error', (e) => {{
+        window.addEventListener('error', (e) => {
             const errorDiv = document.getElementById('error-display');
             errorDiv.style.display = 'block';
             errorDiv.innerHTML = `
                 <strong>JavaScript Error:</strong><br>
-                ${{e.message}}<br>
-                <strong>File:</strong> ${{e.filename}}:${{e.lineno}}<br>
+                ${e.message}<br>
+                <strong>File:</strong> ${e.filename}:${e.lineno}<br>
                 <strong>Stack:</strong><br>
-                <pre>${{e.error ? e.error.stack : 'No stack trace available'}}</pre>
+                <pre>${e.error ? e.error.stack : 'No stack trace available'}</pre>
             `;
-        }});
+        });
         
-        try {{
+        try {
             // Transpiled component code (no Babel needed in browser)
             {transpiled_code}
             
@@ -539,26 +540,26 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
             const sampleProps = {props_json};
             
             // Demo wrapper component
-            const DemoApp = () => {{
-                return React.createElement('div', {{ style: {{ padding: '20px' }} }},
+            const DemoApp = () => {
+                return React.createElement('div', { style: { padding: '20px' } },
                     React.createElement(window.{component_name}, sampleProps)
                 );
-            }};
+            };
             
             // Render the component using vanilla React (no JSX)
             const container = document.getElementById('component-root');
             const root = ReactDOM.createRoot(container);
             root.render(React.createElement(DemoApp));
             
-        }} catch (error) {{
+        } catch (error) {
             console.error('Component rendering error:', error);
             const errorDiv = document.getElementById('error-display');
             errorDiv.style.display = 'block';
             errorDiv.innerHTML = `
                 <strong>Component Error:</strong><br>
-                ${{error.message}}<br>
+                ${error.message}<br>
                 <strong>Stack:</strong><br>
-                <pre>${{error.stack}}</pre>
+                <pre>${error.stack}</pre>
             `;
             
             const container = document.getElementById('component-root');
@@ -569,10 +570,20 @@ def create_babel_preview_html(transpiled_code, component_name, sample_props, sco
                     <p>Check the error details above for debugging information.</p>
                 </div>
             `;
-        }}
+        }
     </script>
 </body>
 </html>'''
+    
+    # Use simple string replacement to avoid template evaluation issues
+    result = template.replace('{component_name}', str(component_name))
+    result = result.replace('{score}', str(score))
+    result = result.replace('{iterations}', str(iterations))
+    result = result.replace('{analysis_preview}', str(analysis_preview))
+    result = result.replace('{transpiled_code}', str(transpiled_code))
+    result = result.replace('{props_json}', props_json)
+    
+    return result
 
 
 def validate_preview_in_browser(html_file_path, timeout_ms=10000):
