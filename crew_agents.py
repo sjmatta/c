@@ -74,12 +74,13 @@ class ComponentCreationCrew:
 # Test automation agent removed for simplified workflow
         
         self.refiner = Agent(
-            role='Nova - Component Refinement Specialist',
-            goal='Iteratively improve components based on feedback and testing',
-            backstory="""You are Nova, a perfectionist who takes feedback and transforms 
-            it into concrete improvements. You excel at refining components to meet 
-            the highest standards of quality and user experience. Like a supernova, 
-            you transform ordinary code into stellar components through iterative excellence.""",
+            role='Nova - PURE Framework Methodology Expert',
+            goal='Analyze components using PURE methodology and provide structured improvement recommendations',
+            backstory="""You are Nova, a PURE Framework methodology expert specializing in React component analysis. 
+            You evaluate components across four critical dimensions: Purposeful (solves the right problem effectively), 
+            Usable (intuitive interface and excellent user experience), Readable (clear, maintainable, well-structured code), 
+            and Extensible (flexible architecture that adapts to future needs). Your analytical expertise transforms 
+            components into stellar implementations through systematic PURE evaluation and targeted improvement strategies.""",
             verbose=True,
             allow_delegation=False
         )
@@ -131,6 +132,10 @@ class ComponentCreationCrew:
         enhancement_suggestions = self.gemini_client.suggest_component_enhancements(component_code, component_type)
         icon_suggestions = self.icon_manager.get_icon_suggestions(component_type)
         
+        # Get Nova's PURE framework analysis and improvements
+        pure_analysis = self._get_nova_pure_analysis(component_code, requirements, final_analysis)
+        pure_improvements = self._get_nova_pure_improvements(component_code, requirements, pure_analysis)
+        
         result = {
             "component_code": component_code,
             "final_analysis": final_analysis,
@@ -145,7 +150,9 @@ class ComponentCreationCrew:
                     self.gemini_client.generate_placeholder_image_url(component_type, requirements, 300, 200),
                     self.gemini_client.generate_placeholder_image_url(component_type, requirements, 600, 400)
                 ]
-            }
+            },
+            "nova_pure_analysis": pure_analysis,
+            "nova_pure_improvements": pure_improvements
         }
         
         return result
@@ -344,6 +351,129 @@ Return improved component with beautiful styling and all suggested improvements 
                 return int(match.group(1))
         
         return 5  # Default neutral score
+    
+    def _get_nova_pure_analysis(self, component_code, requirements, existing_analysis):
+        """Get Nova's PURE framework analysis of the component"""
+        print("🔍 Nova performing PURE framework analysis...")
+        
+        pure_prompt = f"""
+        As Nova, a PURE Framework methodology expert, analyze this React component using the PURE methodology:
+
+        REQUIREMENTS:
+        {requirements}
+
+        COMPONENT CODE:
+        ```jsx
+        {component_code}
+        ```
+
+        EXISTING ANALYSIS (for context):
+        {existing_analysis}
+
+        ## PURE Framework Analysis Instructions:
+
+        Evaluate the component across these four dimensions with scores 1-10 and detailed explanations:
+
+        ### 1. PURPOSEFUL (Does it solve the right problem effectively?)
+        - Problem alignment: Does the component address the stated requirements?
+        - Feature completeness: Are all requested features implemented?
+        - User value: Does it provide clear value to end users?
+        - Scope appropriateness: Is the component focused or trying to do too much?
+
+        ### 2. USABLE (Is the interface intuitive and user experience excellent?)
+        - Intuitive design: Can users understand how to interact without instruction?
+        - Accessibility: Screen readers, keyboard navigation, color contrast
+        - Error handling: Graceful failure modes and user feedback
+        - Performance perception: Loading states, smooth interactions
+
+        ### 3. READABLE (Is the code clear, maintainable, and well-structured?)
+        - Code clarity: Self-documenting variable names, clear logic flow
+        - Structure: Well-organized components, separation of concerns
+        - TypeScript usage: Proper types, interfaces, error prevention
+        - Documentation: Comments where needed, not over-commented
+
+        ### 4. EXTENSIBLE (Is the architecture flexible for future needs?)
+        - Modularity: Can parts be reused or replaced independently?
+        - Configuration: Props allow customization without code changes?
+        - Scalability: Will it perform well with more data or features?
+        - Future-proofing: Built with modern patterns that will age well?
+
+        ## Output Format:
+        Provide a structured analysis with:
+        - Dimension scores (1-10)
+        - Specific strengths and weaknesses for each dimension
+        - Overall PURE score (average of four dimensions)
+        - Critical issues that impact multiple dimensions
+
+        Be thorough but concise. Focus on actionable insights that lead to concrete improvements.
+        """
+        
+        try:
+            response = self.gemini_client.model.generate_content(pure_prompt)
+            return response.text
+        except Exception as e:
+            print(f"❌ Nova PURE analysis failed: {e}")
+            return "PURE analysis unavailable due to technical error."
+    
+    def _get_nova_pure_improvements(self, component_code, requirements, pure_analysis):
+        """Get Nova's PURE-based improvement recommendations"""
+        print("💡 Nova generating PURE-based improvements...")
+        
+        improvements_prompt = f"""
+        As Nova, a PURE Framework methodology expert, provide specific, actionable improvement recommendations:
+
+        ORIGINAL REQUIREMENTS:
+        {requirements}
+
+        COMPONENT CODE:
+        ```jsx
+        {component_code}
+        ```
+
+        YOUR PURE ANALYSIS:
+        {pure_analysis}
+
+        ## Improvement Instructions:
+
+        Based on your PURE analysis, provide specific improvements organized by dimension:
+
+        ### PURPOSEFUL Improvements:
+        - Features to add/modify to better meet requirements
+        - Scope refinements to improve focus
+        - User value enhancements
+
+        ### USABLE Improvements:
+        - Specific accessibility fixes (ARIA labels, keyboard navigation, color contrast)
+        - UX enhancements (loading states, error messages, visual feedback)
+        - Interaction improvements
+
+        ### READABLE Improvements:
+        - Code structure optimizations
+        - TypeScript enhancements
+        - Documentation additions
+        - Naming improvements
+
+        ### EXTENSIBLE Improvements:
+        - Prop interface enhancements for flexibility
+        - Modular architecture suggestions
+        - Performance optimizations
+        - Future-proofing recommendations
+
+        ## Implementation Priority:
+        Rank improvements by:
+        1. Critical (must fix) - Major accessibility, functionality, or architectural issues
+        2. High (should fix) - Significant UX or maintainability improvements  
+        3. Medium (nice to have) - Polish and optimization opportunities
+
+        Provide specific code examples where helpful. Focus on improvements that enhance multiple PURE dimensions simultaneously.
+        """
+        
+        try:
+            response = self.gemini_client.model.generate_content(improvements_prompt)
+            return response.text
+        except Exception as e:
+            print(f"❌ Nova PURE improvements failed: {e}")
+            return "PURE improvements unavailable due to technical error."
 
 
 def test_crew():
