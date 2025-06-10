@@ -65,26 +65,40 @@ def extract_component_code(component_text):
 
 
 def extract_component_name(code):
-    """Extract the component name from React code"""
+    """Extract the component name from React code, prioritizing reusable components over demo wrappers"""
     if not code:
         return 'Component'
+    
+    # Demo/wrapper component names to deprioritize
+    demo_names = {'App', 'Demo', 'Preview', 'Example', 'Container', 'Wrapper', 'Test'}
+    
+    # Collect all component names found
+    component_names = []
     
     # Look for export default ComponentName;
     match = re.search(r'export\s+default\s+(\w+)\s*;', code)
     if match:
-        return match.group(1)
+        component_names.append(match.group(1))
     
-    # Look for const ComponentName = 
-    match = re.search(r'const\s+([A-Z][A-Za-z0-9_]*)\s*[:=]', code)
-    if match:
-        return match.group(1)
+    # Look for const ComponentName = (collect all matches)
+    matches = re.findall(r'const\s+([A-Z][A-Za-z0-9_]*)\s*[:=]', code)
+    component_names.extend(matches)
     
-    # Look for function ComponentName
-    match = re.search(r'function\s+([A-Z][A-Za-z0-9_]*)\s*\(', code)
-    if match:
-        return match.group(1)
+    # Look for function ComponentName (collect all matches)
+    matches = re.findall(r'function\s+([A-Z][A-Za-z0-9_]*)\s*\(', code)
+    component_names.extend(matches)
     
-    return 'Component'
+    if not component_names:
+        return 'Component'
+    
+    # Prioritize non-demo components
+    preferred_names = [name for name in component_names if name not in demo_names]
+    if preferred_names:
+        # Return the first non-demo component (usually the main reusable one)
+        return preferred_names[0]
+    
+    # Fallback to any component name if all are demo-like
+    return component_names[0]
 
 
 def transpile_component_with_babel(component_code, component_name):

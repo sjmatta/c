@@ -143,14 +143,28 @@ class IntelligentPropGenerator:
             ]
     
     def _analyze_typescript_interfaces(self, code: str) -> Optional[Dict[str, Any]]:
-        """Extract and generate props from TypeScript interface definitions"""
+        """Extract and generate props from TypeScript interface and type definitions"""
         
-        # Find interface definitions
+        # Find interface definitions: interface ComponentProps { ... }
         interface_pattern = r'interface\s+(\w*Props)\s*\{([^}]+)\}'
-        matches = re.findall(interface_pattern, code, re.DOTALL)
+        interface_matches = re.findall(interface_pattern, code, re.DOTALL)
+        
+        # Find type definitions: type ComponentProps = { ... }
+        type_pattern = r'type\s+(\w*Props)\s*=\s*\{([^}]+)\}'
+        type_matches = re.findall(type_pattern, code, re.DOTALL)
+        
+        # Combine both types of matches
+        matches = interface_matches + type_matches
         
         if not matches:
             return None
+        
+        # Extract type aliases for reference (e.g., type ButtonVariant = 'primary' | 'secondary')
+        self.type_aliases = {}
+        alias_pattern = r'type\s+(\w+)\s*=\s*([^;]+);'
+        alias_matches = re.findall(alias_pattern, code)
+        for alias_name, alias_value in alias_matches:
+            self.type_aliases[alias_name] = alias_value.strip()
             
         props = {}
         
@@ -170,7 +184,11 @@ class IntelligentPropGenerator:
                     is_optional = optional == '?'
                     
                     # Generate sample value based on type
-                    sample_value = self._generate_value_for_type(prop_type, prop_name)
+                    if is_optional and 'loading' in prop_name.lower():
+                        # Default optional loading states to false for better demo
+                        sample_value = False
+                    else:
+                        sample_value = self._generate_value_for_type(prop_type, prop_name)
                     
                     if sample_value is not None:
                         props[prop_name] = sample_value
@@ -314,10 +332,24 @@ class IntelligentPropGenerator:
         if '[]' in type_str or 'Array<' in type_str:
             return self._generate_typed_array(type_str, prop_name)
             
+        # Check if this is a type alias reference
+        if hasattr(self, 'type_aliases') and type_str in self.type_aliases:
+            # Resolve the type alias and recurse
+            resolved_type = self.type_aliases[type_str]
+            return self._generate_value_for_type(resolved_type, prop_name)
+            
         # Union types ('primary' | 'secondary')
         if '|' in type_str:
             options = [opt.strip().strip("'\"") for opt in type_str.split('|')]
             return options[0] if options else "primary"
+            
+        # Handle optional types (ending with ?)
+        if type_str.endswith('?'):
+            base_type = type_str[:-1].strip()
+            # For optional props, provide a default value based on prop name
+            if 'loading' in prop_name.lower():
+                return False  # Don't show loading by default
+            return self._generate_value_for_type(base_type, prop_name)
             
         # Basic types
         if type_str in ['string']:
@@ -328,6 +360,14 @@ class IntelligentPropGenerator:
             return True
         elif type_str.startswith('(') and '=>' in type_str:
             return None  # Function props not needed for preview
+        elif type_str in ['React.ReactNode', 'ReactNode']:
+            # Handle React.ReactNode based on prop name
+            if 'icon' in prop_name.lower():
+                return None  # Icons will be handled specially in preview
+            elif 'children' in prop_name.lower():
+                return self._generate_sample_string(prop_name) 
+            else:
+                return "Sample content"
             
         # Object types or custom interfaces
         return self._generate_sample_object(prop_name, "")
