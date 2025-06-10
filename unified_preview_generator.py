@@ -275,46 +275,55 @@ window.Pagination = Pagination;
     return pagination_component
 
 def generate_sample_props(component_code, component_name):
-    """Generate appropriate sample props based on component analysis"""
+    """Generate appropriate sample props using intelligent analysis"""
     
-    props = {}
-    component_lower = component_name.lower()
-    
-    if 'table' in component_lower or 'datatable' in component_lower:
-        props = {
-            "data": [
-                {"id": "1", "name": "John Doe", "age": 32, "email": "john@example.com"},
-                {"id": "2", "name": "Jane Smith", "age": 28, "email": "jane@example.com"},
-                {"id": "3", "name": "Bob Wilson", "age": 35, "email": "bob@example.com"},
-                {"id": "4", "name": "Alice Brown", "age": 29, "email": "alice@example.com"}
-            ],
-            "columns": [
-                {"key": "id", "label": "ID"},
-                {"key": "name", "label": "Name"},
-                {"key": "age", "label": "Age"},
-                {"key": "email", "label": "Email"}
-            ]
-        }
-    elif 'button' in component_lower:
-        props = {
-            "text": "Click me!",
-            "label": "Click me!",
-            "children": "Click me!",
-            "variant": "primary",
-            "size": "medium",
-            "disabled": False,
-            "ariaLabel": "Click me button"
-        }
-    elif 'card' in component_lower:
-        props = {
-            "title": "Sample Card",
-            "description": "This is a sample card component with some descriptive text.",
-            "imageUrl": "https://via.placeholder.com/300x200",
-            "author": "John Doe",
-            "date": "2024-01-15"
-        }
-    
-    return props
+    try:
+        # Import the intelligent prop generator
+        from intelligent_prop_generator import IntelligentPropGenerator
+        
+        generator = IntelligentPropGenerator()
+        props = generator.generate_props(component_code, component_name)
+        
+        if props:
+            print(f"✅ Generated {len(props)} props for {component_name}: {list(props.keys())}")
+            return props
+        else:
+            print(f"⚠️  No props detected for {component_name}, using empty props")
+            return {}
+            
+    except Exception as e:
+        print(f"⚠️  Intelligent prop generation failed: {e}")
+        print("Falling back to basic legacy prop generation...")
+        
+        # Fallback to simplified legacy approach for critical component types
+        component_lower = component_name.lower()
+        
+        if 'table' in component_lower or 'datatable' in component_lower:
+            return {
+                "data": [
+                    {"id": "1", "name": "John Doe", "age": 32, "email": "john@example.com"},
+                    {"id": "2", "name": "Jane Smith", "age": 28, "email": "jane@example.com"}
+                ],
+                "columns": [
+                    {"key": "id", "label": "ID"},
+                    {"key": "name", "label": "Name"},
+                    {"key": "age", "label": "Age"},
+                    {"key": "email", "label": "Email"}
+                ]
+            }
+        elif 'timeline' in component_lower:
+            return {
+                "events": [
+                    {"id": 1, "date": "2023-11-20", "title": "Project Kickoff", "description": "Sample event"},
+                    {"id": 2, "date": "2024-01-15", "title": "Mid-point Review", "description": "Another event"}
+                ]
+            }
+        elif 'button' in component_lower:
+            return {"children": "Click me!", "variant": "primary"}
+        elif 'card' in component_lower:
+            return {"title": "Sample Card", "description": "Sample description"}
+        
+        return {}
 
 
 def format_analysis_for_html(analysis):
