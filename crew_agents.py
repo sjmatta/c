@@ -151,25 +151,70 @@ class ComponentCreationCrew:
         
         return result
     
+    def _get_component_library_info(self):
+        """Load component library documentation for AI context"""
+        try:
+            with open('component-library.md', 'r') as f:
+                return f.read()
+        except FileNotFoundError:
+            # Fallback to basic component patterns if file doesn't exist
+            return """
+## Available Components
+
+### Pagination Component
+```jsx
+import { Pagination } from './components/Pagination';
+
+<Pagination 
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={handlePageChange}
+/>
+```
+
+### Design Patterns
+- Tables: min-w-full bg-white border border-gray-200
+- Headers: bg-gray-100 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase
+- Buttons: bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg
+"""
+    
     def _generate_initial_component(self, requirements):
         """Generate initial component using OpenUI"""
         print("🎨 Generating initial component with OpenUI...")
         
+        # Load component library reference
+        component_library_info = self._get_component_library_info()
+        
         enhanced_prompt = f"""
         Create a React component: {requirements}
         
-        CRITICAL: Use complete Tailwind class names - NEVER use "..." or placeholders.
+        COMPONENT LIBRARY AVAILABLE:
+        {component_library_info}
+        
+        CRITICAL INSTRUCTIONS:
+        - If your component needs pagination, USE the existing Pagination component (see above)
+        - Use complete Tailwind class names - NEVER use "..." or placeholders
+        - Follow the design system patterns provided above
         
         Requirements:
         - React functional component with TypeScript
         - Use ONLY Tailwind CSS classes (no custom CSS)
-        - Include hover/focus states
+        - Include hover/focus states and proper accessibility
         - Make it responsive
+        - Prefer using existing components over creating everything from scratch
+        
+        PAGINATION STYLING REQUIREMENTS (if applicable):
+        - Pagination container: "flex items-center justify-center gap-2 py-4"
+        - Regular buttons: "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        - Number buttons: Use "h-10 w-10" instead of "px-4 py-2" for square buttons
+        - Active page button: Add "bg-blue-600 text-white hover:bg-blue-600/90" classes
+        - Disabled buttons: Add "opacity-50 cursor-not-allowed" classes
         
         Examples of complete Tailwind classes:
         - Button: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
         - Card: "bg-white rounded-lg shadow-lg p-6"
-        - Text: "text-gray-900 font-semibold text-lg"
+        - Table: "min-w-full bg-white border border-gray-200"
+        - Input: "border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         
         Format as:
         ```jsx
@@ -181,7 +226,7 @@ class ComponentCreationCrew:
         
         const Component: React.FC<Props> = (props) => {{
           return (
-            // JSX with complete Tailwind classes
+            // JSX with complete Tailwind classes - NO UNSTYLED ELEMENTS
           );
         }};
         
@@ -220,6 +265,9 @@ class ComponentCreationCrew:
         """Refine component based on improvements"""
         print("✨ Refining component...")
         
+        # Load component library reference
+        component_library_info = self._get_component_library_info()
+        
         refinement_prompt = f"""
         Improve this React component based on the analysis and suggestions:
         
@@ -227,6 +275,9 @@ class ComponentCreationCrew:
         ```jsx
         {component_code}
         ```
+        
+        COMPONENT LIBRARY AVAILABLE:
+        {component_library_info}
         
         REQUIREMENTS:
         {requirements}
@@ -237,8 +288,15 @@ class ComponentCreationCrew:
         IMPROVEMENTS TO IMPLEMENT:
         {improvements}
         
+        CRITICAL INSTRUCTIONS:
+        - If the component needs pagination, REPLACE any existing pagination with the Pagination component from above
+        - Use complete Tailwind class names - NEVER use "..." or placeholders  
+        - Follow the design system patterns provided
+        - ALL interactive elements (buttons, inputs, etc.) MUST be fully styled
+        - Prefer using existing components over creating everything from scratch
+        
         Please provide the improved component code that addresses the identified issues.
-        Focus on the highest priority improvements first.
+        Focus on the highest priority improvements first, including using existing components.
         """
         
         return self.openui_client.create_component(refinement_prompt)
