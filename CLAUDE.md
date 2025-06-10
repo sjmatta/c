@@ -15,10 +15,10 @@ This is an **intelligent React component creation system** that integrates OpenU
 
 ### Agent System Design
 The system uses CrewAI to orchestrate specialized agents in `crew_agents.py`:
-- **Component Designer**: Interfaces with OpenUI for initial component generation
-- **Quality Analyst**: Performs quality assessment (configurable framework)
-- **Test Engineer**: Generates comprehensive Jest/RTL test suites  
-- **Refiner**: Iteratively improves components based on analysis feedback
+- **Aria** (Component Designer): Interfaces with OpenUI for initial component generation
+- **Phoenix/Quinn** (Quality Analyst): Performs quality assessment (configurable framework)
+- **Sage** (Test Engineer): Generates comprehensive Jest/RTL test suites  
+- **Nova** (Refiner): Iteratively improves components based on analysis feedback
 
 ### Analysis Frameworks
 Two analysis approaches are available:
@@ -87,12 +87,30 @@ make benchmark
 
 ## Key Implementation Details
 
-### SSE Streaming Handling (`openui_client.py`)
-OpenUI returns streaming responses that must be parsed line-by-line:
+### OpenUI Integration with Automatic Continuation (`openui_client.py`)
+OpenUI generates Tailwind-based React components with intelligent continuation support:
+- **Automatic Truncation Handling**: Uses AST validation and conversation continuation to generate complete components
+- **No Token Limit Restrictions**: Can generate arbitrarily complex components through iterative refinement
+- **Self-Healing**: Automatically detects and fixes syntax errors through LLM collaboration
+- OpenUI responds via SSE streaming with finish_reason detection:
 ```python
-for line in response.iter_lines(decode_unicode=True):
-    if line.startswith("data: "):
-        data = line[6:]  # Remove "data: " prefix
+# New continuation-aware approach
+def create_component_with_continuation(self, prompt, max_retries=3):
+    conversation = [{"role": "user", "content": prompt}]
+    accumulated_response = ""
+    
+    for attempt in range(max_retries + 1):
+        response_data = self._make_api_call(conversation, model, max_tokens)
+        accumulated_response += response_data["content"]
+        
+        validation = self.validator.validate_component(accumulated_response)
+        if validation["status"] == "COMPLETE":
+            return accumulated_response
+        elif validation["status"] == "TRUNCATED":
+            conversation.extend([
+                {"role": "assistant", "content": response_data["content"]},
+                {"role": "user", "content": "Please continue from exactly where you left off."}
+            ])
 ```
 
 ### Framework Selection (`main.py`, `crew_agents.py`)
@@ -107,8 +125,12 @@ PURE framework uses simple regex extraction for robust parsing:
 match = re.search(r'PURE_SCORE:\s*([0-9.]+)', analysis)
 ```
 
-### Preview Generation (`preview_generator.py`)
-Components are converted to vanilla JavaScript for browser demonstration with interactive HTML previews.
+### Preview Generation (`preview_generator.py`, `react_preview_generator.py`)
+Two preview systems are available:
+- **Static HTML Preview**: Converts simple components to vanilla JavaScript (limited, prone to errors)
+- **React Preview**: Uses Babel in-browser transpilation for full TypeScript/React component rendering (recommended)
+
+**CRITICAL**: Use `react_preview_generator.py` for complex components with TypeScript, state, or advanced React features.
 
 ## Output Structure
 
@@ -140,12 +162,43 @@ New predefined components should be added to `Makefile` with:
 - Appropriate iteration count
 - Output file naming convention
 
+### Preview Generator Critical Requirements
+**ALWAYS test preview generation after making changes to prevent JavaScript errors:**
+
+1. **JSX-to-HTML Conversion Must Be Robust**:
+   - Never leave React syntax like `onClick={}` in HTML output
+   - Always ensure HTML attributes are properly quoted
+   - Replace React expressions `{variable}` with actual values
+   - Remove React comments `{/* */}` completely
+
+2. **Testing Protocol**:
+   - After any preview_generator.py changes, IMMEDIATELY test with: `python preview_generator.py result.json test.html && open test.html`
+   - **CRITICAL**: Open browser developer tools (F12) and check the Console tab for JavaScript errors
+   - **CRITICAL**: Actually look at the generated page - don't assume it works if the file opens
+   - Verify component renders correctly and is interactive
+   - If using React previews, ensure Babel can transpile the TypeScript syntax
+
+3. **Common JSX-to-HTML Issues**:
+   - **Complex React logic**: Components with `.map()`, loops, or complex state cannot be converted to static HTML
+   - **Unquoted attributes**: `class=value` should be `class="value"`
+   - **React events**: `onClick={handler}` should be removed entirely
+   - **Missing quotes in dynamic attributes**: `alt={name}` should become `alt="John Doe"`
+   - **Broken class names with "..."**: replace with actual Tailwind classes
+   - **Invalid JavaScript expressions**: `{columns.map(...)}` in HTML causes JavaScript errors
+
+4. **Complex Component Handling**:
+   - For components with `.map()` or complex React logic, use `react_preview_generator.py` instead of static conversion
+   - Table components should show sample data with working interactivity
+   - Always provide working HTML that renders without JavaScript errors
+   - Use Babel transpilation for TypeScript instead of manual syntax stripping
+
 ### Error Handling
 The system handles common failures gracefully:
 - OpenUI connection issues
 - Gemini API rate limits  
 - SSE stream interruptions
 - Score extraction failures (falls back to neutral scores)
+- **Preview generation failures** (must be caught and fixed immediately)
 
 ## Security Considerations
 

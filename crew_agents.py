@@ -24,7 +24,6 @@ class ComponentCreationCrew:
         self.use_pure_framework = use_pure_framework
         if use_pure_framework:
             # Pass API key to PURE analyst to ensure it works
-            import os
             api_key = os.getenv('GEMINI_API_KEY')
             self.pure_analyst = PureFrameworkAnalyst(api_key=api_key)
             print("🎯 Using PURE Framework Analyst (Purposeful, Usable, Readable, Extensible)")
@@ -34,53 +33,58 @@ class ComponentCreationCrew:
         
         # Define agents
         self.component_designer = Agent(
-            role='Senior Frontend Component Designer',
+            role='Aria - Senior Frontend Component Designer',
             goal='Create exceptional React components that meet user requirements',
-            backstory="""You are a senior frontend developer with 10+ years of experience 
+            backstory="""You are Aria, a senior frontend developer with 10+ years of experience 
             creating beautiful, functional, and accessible React components. You understand 
-            modern design patterns, accessibility standards, and performance best practices.""",
+            modern design patterns, accessibility standards, and performance best practices. 
+            You have an artistic eye and believe that code should be both functional and elegant.""",
             verbose=True,
             allow_delegation=False
         )
         
         if use_pure_framework:
             self.quality_analyst = Agent(
-                role='PURE Framework Quality Analyst',
+                role='Phoenix - PURE Framework Quality Analyst',
                 goal='Analyze components using PURE framework: Purposeful, Usable, Readable, Extensible',
-                backstory="""You are a PURE framework specialist who evaluates components across 
+                backstory="""You are Phoenix, a PURE framework specialist who evaluates components across 
                 four key dimensions: Purposeful (solves the right problem), Usable (intuitive and 
                 accessible), Readable (clear and maintainable code), and Extensible (flexible and 
-                future-proof). You provide structured analysis with actionable improvements.""",
+                future-proof). You provide structured analysis with actionable improvements. Your analytical 
+                mind sees patterns others miss, like a phoenix rising with clarity from complexity.""",
                 verbose=True,
                 allow_delegation=False
             )
         else:
             self.quality_analyst = Agent(
-                role='Code Quality and UX Analyst',
+                role='Quinn - Code Quality and UX Analyst',
                 goal='Analyze components for quality, usability, and adherence to best practices',
-                backstory="""You are a meticulous quality analyst who reviews code for 
+                backstory="""You are Quinn, a meticulous quality analyst who reviews code for 
                 functionality, performance, accessibility, and user experience. You catch 
-                issues others miss and provide actionable improvement suggestions.""",
+                issues others miss and provide actionable improvement suggestions. Your keen eye 
+                for detail and passion for user experience makes you the team's quality guardian.""",
                 verbose=True,
                 allow_delegation=False
             )
         
         self.test_engineer = Agent(
-            role='Test Automation Engineer',
+            role='Sage - Test Automation Engineer',
             goal='Create comprehensive test suites for React components',
-            backstory="""You are a test automation expert who creates thorough test 
+            backstory="""You are Sage, a test automation expert who creates thorough test 
             coverage including unit tests, integration tests, accessibility tests, 
-            and edge case scenarios.""",
+            and edge case scenarios. You believe that every great component needs great tests,
+            and your wisdom comes from preventing bugs before they happen.""",
             verbose=True,
             allow_delegation=False
         )
         
         self.refiner = Agent(
-            role='Component Refinement Specialist',
+            role='Nova - Component Refinement Specialist',
             goal='Iteratively improve components based on feedback and testing',
-            backstory="""You are a perfectionist who takes feedback and transforms 
+            backstory="""You are Nova, a perfectionist who takes feedback and transforms 
             it into concrete improvements. You excel at refining components to meet 
-            the highest standards of quality and user experience.""",
+            the highest standards of quality and user experience. Like a supernova, 
+            you transform ordinary code into stellar components through iterative excellence.""",
             verbose=True,
             allow_delegation=False
         )
@@ -152,33 +156,36 @@ class ComponentCreationCrew:
         print("🎨 Generating initial component with OpenUI...")
         
         enhanced_prompt = f"""
-        Create a React component with the following requirements:
-        {requirements}
+        Create a React component: {requirements}
         
-        Please provide both the React component AND the CSS styling.
+        CRITICAL: Use complete Tailwind class names - NEVER use "..." or placeholders.
         
-        Component requirements:
-        - Follows modern React best practices
-        - Is accessible (ARIA labels, keyboard navigation)
-        - Has proper TypeScript types if applicable
-        - Includes hover/focus states
-        - Is responsive
-        - Has clean, readable code structure
+        Requirements:
+        - React functional component with TypeScript
+        - Use ONLY Tailwind CSS classes (no custom CSS)
+        - Include hover/focus states
+        - Make it responsive
         
-        CSS requirements:
-        - Include comprehensive CSS styling for all component states
-        - Use modern CSS features (flexbox, grid, transitions, etc.)
-        - Include hover, focus, active, and disabled states
-        - Make it visually appealing and professional
-        - Support component variants (primary, secondary, etc.) if applicable
+        Examples of complete Tailwind classes:
+        - Button: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
+        - Card: "bg-white rounded-lg shadow-lg p-6"
+        - Text: "text-gray-900 font-semibold text-lg"
         
-        Format the response with separate code blocks:
+        Format as:
         ```jsx
-        // React component here
-        ```
+        import React from 'react';
         
-        ```css
-        /* CSS styling here */
+        interface Props {{
+          // props here
+        }}
+        
+        const Component: React.FC<Props> = (props) => {{
+          return (
+            // JSX with complete Tailwind classes
+          );
+        }};
+        
+        export default Component;
         ```
         """
         
