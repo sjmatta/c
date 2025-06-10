@@ -17,9 +17,9 @@ This is an **intelligent React component creation system** that integrates OpenU
 The system uses CrewAI to orchestrate specialized agents in `crew_agents.py`:
 - **Aria** (Component Designer): Interfaces with OpenUI for initial component generation with enhanced design capabilities
 - **Phoenix/Quinn** (Quality Analyst): Performs quality assessment (configurable framework)
-- **Nova** (Refiner): Iteratively improves components based on analysis feedback (currently disabled to prevent token overflow)
+- **Nova** (PURE Framework Methodology Expert): Provides comprehensive PURE framework analysis and structured improvement recommendations
 
-**Note**: Test generation has been removed for simplified workflow.
+**Note**: Test generation has been removed for simplified workflow. Iterative improvements are disabled but Nova provides detailed PURE methodology evaluation.
 
 ### Enhanced Design Capabilities
 - **Icon Library Manager** (`icon_library.py`): Provides context-aware icon suggestions for Heroicons, Lucide React, and Tabler Icons
@@ -31,6 +31,38 @@ The system uses CrewAI to orchestrate specialized agents in `crew_agents.py`:
 Two analysis approaches are available:
 - **Standard Framework** (default): 6-dimension evaluation (functionality, code quality, accessibility, performance, UX, missing features)
 - **PURE Framework** (optional): Structured evaluation of Purposeful, Usable, Readable, Extensible dimensions
+
+### Nova's PURE Framework Analysis
+**Nova automatically provides comprehensive PURE methodology evaluation for all components:**
+
+#### PURE Dimensions Analyzed:
+1. **PURPOSEFUL (1-10)**: Does it solve the right problem effectively?
+   - Problem alignment with stated requirements
+   - Feature completeness and user value delivery
+   - Scope appropriateness and focus
+
+2. **USABLE (1-10)**: Is the interface intuitive with excellent UX?
+   - Intuitive design and accessibility compliance
+   - Error handling and performance perception
+   - Screen reader support and keyboard navigation
+
+3. **READABLE (1-10)**: Is the code clear, maintainable, and well-structured?
+   - Code clarity and self-documenting patterns
+   - TypeScript usage and proper documentation
+   - Component structure and separation of concerns
+
+4. **EXTENSIBLE (1-10)**: Is the architecture flexible for future needs?
+   - Modularity and prop-based configuration
+   - Scalability and future-proofing patterns
+   - Modern React patterns and maintainability
+
+#### Nova's Output Structure:
+- **Detailed dimensional analysis** with specific strengths and weaknesses
+- **Overall PURE score** (average of four dimensions)
+- **Critical issues** that impact multiple dimensions  
+- **Prioritized improvements** (Critical → High → Medium)
+- **Specific code examples** and implementation guidance
+- **Cross-dimensional optimization** suggestions
 
 ## Essential Commands
 
@@ -179,7 +211,7 @@ Generated files follow consistent patterns:
 - Framework-specific outputs: `pure_*.json`, `pure_*.html`
 
 ### Enhanced Output Structure
-The system now generates enriched metadata:
+The system now generates enriched metadata including Nova's PURE analysis:
 ```json
 {
   "component_code": "...",
@@ -196,7 +228,9 @@ The system now generates enriched metadata:
   "placeholder_images": {
     "primary": "https://placehold.co/400x300/8B5CF6/FFFFFF?text=Card",
     "alternatives": ["300x200 variant", "600x400 variant"]
-  }
+  },
+  "nova_pure_analysis": "Detailed PURE framework evaluation with scores for Purposeful, Usable, Readable, Extensible dimensions plus overall PURE score and critical issues identification",
+  "nova_pure_improvements": "Prioritized improvement recommendations organized by PURE dimensions with specific code examples and implementation priority rankings (Critical/High/Medium)"
 }
 ```
 
